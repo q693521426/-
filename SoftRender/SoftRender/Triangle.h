@@ -20,7 +20,7 @@ public:
 	XMVECTOR GetPoint2DPos(int index)const;
 	XMFLOAT2 GetPoint2DPos2f(int index)const;
 	
-	bool IsBackCulling();
+	bool IsBackCulling(const XMVECTOR& LookAt);
 	void Draw();
 private:
 	std::vector<XMFLOAT3> Point3D;

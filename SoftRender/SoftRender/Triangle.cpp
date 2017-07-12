@@ -36,12 +36,12 @@ XMFLOAT2 Triangle::GetPoint2DPos2f(int index)const
 	return Point2D[index];
 }
 
-bool Triangle::IsBackCulling()
+bool Triangle::IsBackCulling(const XMVECTOR& LookAt)
 {
 	XMVECTOR p0 = GetPoint3DPos(0);
 	XMVECTOR p1 = GetPoint3DPos(1);
 	XMVECTOR p2 = GetPoint3DPos(2);
-
+	
 	XMVECTOR v0 = XMVectorSubtract(p1, p0);
 	XMVECTOR v1 = XMVectorSubtract(p2, p0);
 
@@ -49,7 +49,7 @@ bool Triangle::IsBackCulling()
 
 	//Backface-culling
 	XMFLOAT3 dot;
-	XMStoreFloat3(&dot, XMVector3Dot(p0, n));
+	XMStoreFloat3(&dot, XMVector3Dot(LookAt, n));
 	if (dot.x < 0)
 	{
 		return true;

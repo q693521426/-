@@ -68,7 +68,7 @@ private:
 	void Draw(HDC& hdc,const GameTimer& gt);
 	void ClearRenderTargetView(HDC& hdc,const FLOAT* ColorRBGA);
 	XMFLOAT3 transProSpace(const XMFLOAT3& p);
-	void DrawTriangle3D(SimpleVertex vertices[3], HDC& hdc);
+	void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hdc);
 	void updateZBuffer(const XMFLOAT3& v_3f, const XMFLOAT2& v_2f);
 	void CreateTextureFromFile();
 	XMFLOAT2 XMFLOAT2Mul(const XMFLOAT2& f, const FLOAT k);

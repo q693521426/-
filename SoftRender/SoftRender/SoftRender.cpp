@@ -244,27 +244,48 @@ void SoftRender::Draw(HDC& hdc,const GameTimer& gt)
 		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
 	};
 	
-	DrawTriangle3D(vertices, hdc);
-	//for (int i = 0; i < 6; i++)
-	//{
-	//	DrawTriangle3D(vertices + i * 3, hdc);
-	//	DrawTriangle3D(vertices + i * 3 + 1, hdc);
-	//}
+	WORD indices[] =
+	{
+		3,1,0,
+		2,1,3,
+
+		6,4,5,
+		7,4,6,
+
+		11,9,8,
+		10,9,11,
+
+		14,12,13,
+		15,12,14,
+
+		19,17,16,
+		18,17,19,
+
+		22,20,21,
+		23,20,22
+	};
+	//sizeof(indices)/sizeof(WORD)/3
+	for (int i = 0; i <2; i++)
+	{
+		DrawTriangle3D(vertices, indices+i*3, hdc);
+	}
+
 	for (int i = 0; i < screenWidth; ++i)
 		for (int j = 0; j<screenHeight; ++j)
 			SetPixel(hdc, i, j, RGB((BackBuffer(i, j)[0] * 255), BackBuffer(i, j)[1] * 255, BackBuffer(i, j)[2] * 255));
 		
 }
 
-void SoftRender::DrawTriangle3D(SimpleVertex vertices[3],HDC& hdc)
+void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hdc)
 {
-	XMFLOAT3 p0 = transProSpace(vertices[0].Pos);
-	XMFLOAT3 p1 = transProSpace(vertices[1].Pos);
-	XMFLOAT3 p2 = transProSpace(vertices[2].Pos);
-	
 
-	Triangle t(p0, p1, p2,screenWidth,screenHeight);
-	if (t.IsBackCulling())
+	XMFLOAT3 p0 = transProSpace(vertices[indices[0]].Pos);
+	XMFLOAT3 p1 = transProSpace(vertices[indices[1]].Pos);
+	XMFLOAT3 p2 = transProSpace(vertices[indices[2]].Pos);
+
+
+	Triangle t(p0, p1, p2, screenWidth, screenHeight);
+	if (t.IsBackCulling(-mCamera.GetLook()))
 	{
 		return;
 	}
@@ -279,24 +300,24 @@ void SoftRender::DrawTriangle3D(SimpleVertex vertices[3],HDC& hdc)
 	int bottom = MathHelper::Min(p0_2f.y, p1_2f.y, p2_2f.y);
 	int scanWidth = right - left;
 	int scanHeight = top - bottom;
-	
+
 	for (int i = 0; i < scanWidth; ++i)
 	{
 		for (int j = 0; j < scanHeight; ++j)
 		{
 			SimpleVertex2D v;
-			v.Pos = XMFLOAT2(screenWidth/2.0f+left+i, screenHeight / 2.0f +bottom+j);
+			v.Pos = XMFLOAT2(left + i, bottom + j);
 			XMFLOAT3 p_bary = transBaryCentric(v.Pos, p0_2f, p1_2f, p2_2f);
-			if (IsInTriangle(p_bary)&& MathHelper::IsClamp(v.Pos.x, 0.f, (FLOAT)screenWidth) &&
-								MathHelper::IsClamp(v.Pos.y, 0.f, (FLOAT)screenHeight))
+			if (IsInTriangle(p_bary) && MathHelper::IsClamp(v.Pos.x, screenWidth / -2.0f, screenWidth / 2.0f) &&
+				MathHelper::IsClamp(v.Pos.y, screenHeight / -2.0f, screenHeight / 2.0f))
 			{
 				XMFLOAT3 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
-				
-				v.Tex = XMFLOAT2Add3(XMFLOAT2Mul(vertices[0].Tex, p_correct_bary.x),
-					XMFLOAT2Mul(vertices[1].Tex, p_correct_bary.y),
-					XMFLOAT2Mul(vertices[2].Tex, p_correct_bary.z));
-				
-				BackBuffer(v.Pos.x, v.Pos.y) = Tex(v.Tex.x*Tex.GetWidth(), v.Tex.y*Tex.GetHeight());
+
+				v.Tex = XMFLOAT2Add3(XMFLOAT2Mul(vertices[indices[0]].Tex, p_correct_bary.x),
+					XMFLOAT2Mul(vertices[indices[1]].Tex, p_correct_bary.y),
+					XMFLOAT2Mul(vertices[indices[2]].Tex, p_correct_bary.z));
+
+				BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) = Tex(v.Tex.x*Tex.GetWidth(), v.Tex.y*Tex.GetHeight());
 
 			}
 		}
