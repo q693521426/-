@@ -9,7 +9,8 @@ SoftRender::SoftRender():timer(), paused(false),
 						screenWidth(0), screenHeight(0),
 						mCamera()
 {
-
+	mCamera.SetPosition(0.0f, 0.0f, -15.0f);
+	mCamera.UpdateViewMatrix();
 }
 
 SoftRender::SoftRender(const SoftRender& s)
@@ -34,9 +35,16 @@ bool SoftRender::Initialize(HINSTANCE hInstance, int nCmdShow,UINT screenWidth =
 		return false;
 	}
 
-	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+	CreateTextureFromFile();
 
 	return true;
+}
+
+void SoftRender::CreateTextureFromFile()
+{
+	FLOAT ColorRBG[3] = { 1.0f,1.0f,1.0f };
+	Tex.Resize(screenWidth,screenHeight, ColorRBG);
+
 }
 
 int SoftRender::Run()
@@ -236,34 +244,130 @@ void SoftRender::Draw(HDC& hdc,const GameTimer& gt)
 		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
 	};
 	
-	for (int i = 0; i < 6; i++)
-	{
-		DrawRect3D(vertices + i * 4);
-	}
-	
+	DrawTriangle3D(vertices, hdc);
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	DrawTriangle3D(vertices + i * 3, hdc);
+	//	DrawTriangle3D(vertices + i * 3 + 1, hdc);
+	//}
+	for (int i = 0; i < screenWidth; ++i)
+		for (int j = 0; j<screenHeight; ++j)
+			SetPixel(hdc, i, j, RGB((BackBuffer(i, j)[0] * 255), BackBuffer(i, j)[1] * 255, BackBuffer(i, j)[2] * 255));
 		
 }
 
-void SoftRender::DrawRect3D(SimpleVertex vertices[4])
+void SoftRender::DrawTriangle3D(SimpleVertex vertices[3],HDC& hdc)
 {
+	XMFLOAT3 p0 = transProSpace(vertices[0].Pos);
+	XMFLOAT3 p1 = transProSpace(vertices[1].Pos);
+	XMFLOAT3 p2 = transProSpace(vertices[2].Pos);
 	
+
+	Triangle t(p0, p1, p2,screenWidth,screenHeight);
+	if (t.IsBackCulling())
+	{
+		return;
+	}
+
+	XMFLOAT2 p0_2f = t.GetPoint2DPos2f(0);
+	XMFLOAT2 p1_2f = t.GetPoint2DPos2f(1);
+	XMFLOAT2 p2_2f = t.GetPoint2DPos2f(2);
+
+	int left = MathHelper::Min(p0_2f.x, p1_2f.x, p2_2f.x);
+	int right = MathHelper::Max(p0_2f.x, p1_2f.x, p2_2f.x);
+	int top = MathHelper::Max(p0_2f.y, p1_2f.y, p2_2f.y);
+	int bottom = MathHelper::Min(p0_2f.y, p1_2f.y, p2_2f.y);
+	int scanWidth = right - left;
+	int scanHeight = top - bottom;
+	
+	for (int i = 0; i < scanWidth; ++i)
+	{
+		for (int j = 0; j < scanHeight; ++j)
+		{
+			SimpleVertex2D v;
+			v.Pos = XMFLOAT2(screenWidth/2.0f+left+i, screenHeight / 2.0f +bottom+j);
+			XMFLOAT3 p_bary = transBaryCentric(v.Pos, p0_2f, p1_2f, p2_2f);
+			if (IsInTriangle(p_bary)&& MathHelper::IsClamp(v.Pos.x, 0.f, (FLOAT)screenWidth) &&
+								MathHelper::IsClamp(v.Pos.y, 0.f, (FLOAT)screenHeight))
+			{
+				XMFLOAT3 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
+				
+				v.Tex = XMFLOAT2Add3(XMFLOAT2Mul(vertices[0].Tex, p_correct_bary.x),
+					XMFLOAT2Mul(vertices[1].Tex, p_correct_bary.y),
+					XMFLOAT2Mul(vertices[2].Tex, p_correct_bary.z));
+				
+				BackBuffer(v.Pos.x, v.Pos.y) = Tex(v.Tex.x*Tex.GetWidth(), v.Tex.y*Tex.GetHeight());
+
+			}
+		}
+	}
 }
 
-XMFLOAT3 SoftRender::transProSpace(XMFLOAT3 p)
+XMFLOAT2 SoftRender::XMFLOAT2Mul(const XMFLOAT2& f, const FLOAT k)
 {
+	return XMFLOAT2(f.x*k, f.y*k);
+}
+
+XMFLOAT2 SoftRender::XMFLOAT2Add3(const XMFLOAT2& a, const XMFLOAT2& b, const XMFLOAT2& c)
+{
+	return XMFLOAT2(a.x + b.x + c.x, a.y + b.y + c.y);
+}
+
+XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT2& p,const XMFLOAT2& p0, const XMFLOAT2& p1, const XMFLOAT2& p2)
+{
+	XMFLOAT3 p_bary;
+	FLOAT det = (p1.y - p2.y)*(p0.x - p2.x) + (p2.x - p1.x)*(p0.y - p2.y);
+	FLOAT a = ((p1.y - p2.y)*(p.x - p2.x) + (p2.x - p1.x)*(p.y - p2.y)) / det;
+	FLOAT b = ((p2.y - p0.y)*(p.x - p2.x) + (p0.x - p2.x)*(p.y - p2.y)) / det;
+	
+	return XMFLOAT3(a, b, 1.0f - a - b);
+}
+
+XMFLOAT3 SoftRender::transPerspectiveCorrect(const XMFLOAT3& p_bary,const FLOAT z0, const FLOAT z1, const FLOAT z2)
+{
+	FLOAT a = p_bary.x / z0;
+	FLOAT b = p_bary.y / z1;
+	FLOAT c = p_bary.z / z2;
+	FLOAT d = a+b+c;
+
+	FLOAT x = a / d;
+	FLOAT y = b / d;
+	FLOAT z = 1 - x - y;
+	
+	return XMFLOAT3(x, y, z);
+}
+
+bool SoftRender::IsInTriangle(XMFLOAT3 p_bary)
+{
+	return MathHelper::IsClamp(p_bary.x,0.f,1.0f) &&
+			MathHelper::IsClamp(p_bary.y, 0.f, 1.0f) &&
+			MathHelper::IsClamp(p_bary.z, 0.f, 1.0f);
+}
+
+XMFLOAT3 SoftRender::transProSpace(const XMFLOAT3& p)
+{
+	XMFLOAT3 v_3f;
+	XMVECTOR v;
+
 	World = XMMatrixIdentity();
-	View = mCamera.GetView();
-	Project = mCamera.GetProj();
-
-	XMVECTOR v = XMVector3TransformNormal(XMLoadFloat3(&p), World*View*Project);
-	XMStoreFloat3(&p, v);
-	return p;
+	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	View = XMMatrixLookAtLH(Eye, At, Up);
+	Project = XMMatrixPerspectiveFovLH(XM_PIDIV4, screenWidth / (FLOAT)screenHeight, 0.01f, 100.0f);
+	/*View = mCamera.GetView();
+	Project = mCamera.GetProj();*/
+	
+	v = XMVector4Normalize(XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), World*View*Project));
+	XMStoreFloat3(&v_3f, v);
+	return v_3f;
 }
 
-XMFLOAT3 GetTextureColor(XMFLOAT2 p)
+void SoftRender::updateZBuffer(const XMFLOAT3& v_3f, const XMFLOAT2& v_2f)
 {
-
+	zBuffer(v_2f.x, v_2f.y) = MathHelper::Min(zBuffer(v_2f.x, v_2f.y), v_3f.z);
 }
+
 
 //XMFLOAT4 transFloat3T4(const XMFLOAT3& v3, FLOAT f)
 //{
@@ -286,9 +390,6 @@ void SoftRender::ClearRenderTargetView(HDC& hdc,const FLOAT* ColorRBGA)
 {
 	FLOAT* color=const_cast<FLOAT*>(ColorRBGA);
 	BackBuffer.Resize(screenWidth, screenHeight,color);
-	for (int i = 0; i < screenWidth; ++i)
-		for(int j=0;j<screenHeight;++j)
-			SetPixel(hdc, i, j, RGB(ColorRBGA[0]*255, ColorRBGA[1]*255, ColorRBGA[2]*255));
 }
 
 void SoftRender::CalculateFrameStats()

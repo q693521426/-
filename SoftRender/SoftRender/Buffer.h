@@ -11,16 +11,18 @@ class Buffer
 public:
 	Buffer();
 	~Buffer();
+	const size_t GetWidth()const;
+	const size_t GetHeight()const;
 
-	void Resize(size_t r, size_t c, T t);
+	void Resize(size_t w, size_t h, T t);
 	void Clear(T);
 	void Release();
-	const T& operator()(size_t r,size_t c)const;
-	T& operator()(size_t r, size_t c);
+	const T& operator()(size_t x,size_t y)const;
+	T& operator()(size_t x, size_t y);
 private:
 	std::vector<T> buffer;
-	size_t row;
-	size_t col;
+	size_t width;
+	size_t height;
 };
 template<typename T>
 Buffer<T>::Buffer()
@@ -33,12 +35,24 @@ Buffer<T>::~Buffer()
 }
 
 template<typename T>
-void Buffer<T>::Resize(size_t r, size_t c, T t)
+const size_t Buffer<T>::GetWidth()const
+{
+	return width;
+}
+
+template<typename T>
+const size_t Buffer<T>::GetHeight()const
+{
+	return height;
+}
+
+template<typename T>
+void Buffer<T>::Resize(size_t w, size_t h, T t)
 {
 	Release();
-	buffer.resize(r*c);
-	row = r;
-	col = c;
+	buffer.resize(w*h);
+	width = w;
+	height = h;
 	Clear(t);
 }
 
@@ -65,19 +79,19 @@ void Buffer<T>::Clear(T t)
 }
 
 template<typename T>
-const T& Buffer<T>::operator()(size_t r, size_t c)const
+const T& Buffer<T>::operator()(size_t x, size_t y)const
 {
-	size_t index = r*row + c;
-	assert(index < row*col);
-	return buffer[r*row + c];
-}
+	size_t index = y*width + x;
+	assert(index < height*width);
+	return buffer[index];
+} 
 
 template<typename T>
-T& Buffer<T>::operator()(size_t r, size_t c)
+T& Buffer<T>::operator()(size_t x, size_t y)
 {
 	return const_cast<T&>
 		(static_cast<const Buffer<T>&>
-		(*this)(r, c));
+		(*this)(x, y));
 }
 
 #endif

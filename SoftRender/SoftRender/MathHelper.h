@@ -38,11 +38,23 @@ public:
 	}
 
 	template<typename T>
+	static T Min(const T& a, const T& b, const T& c)
+	{
+		return Min(Min(a, b), c);
+	}
+
+	template<typename T>
 	static T Max(const T& a, const T& b)
 	{
 		return a > b ? a : b;
 	}
-	 
+	
+	template<typename T>
+	static T Max(const T& a, const T& b, const T& c)
+	{
+		return Max(Max(a, b), c);
+	}
+
 	template<typename T>
 	static T Lerp(const T& a, const T& b, float t)
 	{
@@ -55,6 +67,14 @@ public:
 		return x < low ? low : (x > high ? high : x); 
 	}
 
+	template<typename T>
+	static bool IsClamp(const T& x, const T& low, const T& high)
+	{
+		if (x >= low && x <= high)
+			return true;
+		else
+			return false;
+	}
 	// Returns the polar angle of the point (x,y) in [0, 2*PI).
 	static float AngleFromXY(float x, float y);
 
