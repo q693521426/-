@@ -14,11 +14,13 @@ public:
 	const size_t GetWidth()const;
 	const size_t GetHeight()const;
 
+	void Resize(size_t w, size_t h);
 	void Resize(size_t w, size_t h, T t);
 	void Clear(T);
 	void Release();
 	const T& operator()(size_t x,size_t y)const;
 	T& operator()(size_t x, size_t y);
+	
 private:
 	std::vector<T> buffer;
 	size_t width;
@@ -57,15 +59,17 @@ void Buffer<T>::Resize(size_t w, size_t h, T t)
 }
 
 template<typename T>
+void Buffer<T>::Resize(size_t w, size_t h)
+{
+	Release();
+	buffer.resize(w*h);
+	width = w;
+	height = h;
+}
+
+template<typename T>
 void Buffer<T>::Release()
 {
-	for (int i = 0; i < buffer.size(); ++i)
-	{
-		if (buffer[i])
-		{
-			buffer[i] = 0;
-		}
-	}
 	buffer.clear();
 }
 

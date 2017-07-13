@@ -45,12 +45,12 @@ bool Triangle::IsBackCulling(const XMVECTOR& LookAt)
 	XMVECTOR v0 = XMVectorSubtract(p1, p0);
 	XMVECTOR v1 = XMVectorSubtract(p2, p0);
 
-	XMVECTOR n = XMVector3Normalize(XMVector3Cross(p0, p1));
+	XMVECTOR n = XMVector3Normalize(XMVector3Cross(v0, v1));
 
 	//Backface-culling
 	XMFLOAT3 dot;
 	XMStoreFloat3(&dot, XMVector3Dot(LookAt, n));
-	if (dot.x < 0)
+	if (dot.x > 0)
 	{
 		return true;
 	}
