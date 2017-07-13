@@ -380,10 +380,11 @@ void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hd
 				XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
 				if (updateZBuffer(XMFLOAT3(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, p_correct_bary.w)))
 				{
-					v.Tex = XMFLOAT2Add3(XMFLOAT2Mul(vertices[indices[0]].Tex, p_correct_bary.x),
-						XMFLOAT2Mul(vertices[indices[1]].Tex, p_correct_bary.y),
-						XMFLOAT2Mul(vertices[indices[2]].Tex, p_correct_bary.z));
-					
+					XMVECTOR v_tex=  XMLoadFloat2(&vertices[indices[0]].Tex) * XMVectorReplicate(p_correct_bary.x)
+									+ XMLoadFloat2(&vertices[indices[1]].Tex) * XMVectorReplicate(p_correct_bary.y)
+									+ XMLoadFloat2(&vertices[indices[2]].Tex) * XMVectorReplicate(p_correct_bary.z);
+					XMStoreFloat2(&v.Tex, v_tex);
+
 					BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) =
 						getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
 				}

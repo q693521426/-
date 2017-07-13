@@ -8,14 +8,14 @@ h:\github\-\softrender\softrender\softrender.cpp(363): warning C4244: “初始�
 h:\github\-\softrender\softrender\softrender.cpp(364): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
 h:\github\-\softrender\softrender\softrender.cpp(365): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
 h:\github\-\softrender\softrender\softrender.cpp(374): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-h:\github\-\softrender\softrender\softrender.cpp(387): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
-h:\github\-\softrender\softrender\softrender.cpp(399): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(388): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
 h:\github\-\softrender\softrender\softrender.cpp(400): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-h:\github\-\softrender\softrender\softrender.cpp(407): warning C4018: “>=”: 有符号/无符号不匹配
-h:\github\-\softrender\softrender\softrender.cpp(424): warning C4244: “参数”: 从“double”转换到“int32_t”，可能丢失数据
-h:\github\-\softrender\softrender\softrender.cpp(440): warning C4101: “p_bary”: 未引用的局部变量
-h:\github\-\softrender\softrender\softrender.cpp(484): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
-h:\github\-\softrender\softrender\softrender.cpp(486): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(401): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(408): warning C4018: “>=”: 有符号/无符号不匹配
+h:\github\-\softrender\softrender\softrender.cpp(425): warning C4244: “参数”: 从“double”转换到“int32_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(441): warning C4101: “p_bary”: 未引用的局部变量
+h:\github\-\softrender\softrender\softrender.cpp(485): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(487): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
 h:\github\-\softrender\softrender\buffer.h(79): warning C4018: “<”: 有符号/无符号不匹配
   h:\github\-\softrender\softrender\buffer.h(78): note: 编译 类 模板 成员函数 "void Buffer<FLOAT>::Clear(T)" 时
           with
