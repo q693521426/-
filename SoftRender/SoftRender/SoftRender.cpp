@@ -103,8 +103,10 @@ int SoftRender::Run()
 			timer.Tick();
 			CalculateFrameStats();
 			Update(timer);
-			Render();
 		}
+
+		Render();
+		Sleep(100);
 	}
 
 	return (int)msg.wParam;
@@ -112,8 +114,6 @@ int SoftRender::Run()
 
 void SoftRender::Render()
 {
-	HDC hdc;
-	PAINTSTRUCT ps;
 	hdc = BeginPaint(hWnd, &ps);
 	HDC backbuffDC = CreateCompatibleDC(hdc);
 
@@ -209,8 +209,6 @@ HRESULT SoftRender::InitWindow(HINSTANCE hInstance, int nCmdShow, UINT screenWid
 
 LRESULT CALLBACK SoftRender::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	PAINTSTRUCT ps;
-	HDC hdc;
 	switch (umsg)
 	{
 	case WM_ACTIVATE:
@@ -227,7 +225,7 @@ LRESULT CALLBACK SoftRender::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam,
 		return 0;
 	case WM_PAINT:
 	{
-		Render();
+	//	Render();
 		return 0;
 	}
 	default:
@@ -324,7 +322,11 @@ void SoftRender::Draw(HDC& hdc, const GameTimer& gt)
 		23,20,22
 	};
 	static float t = 0.0f;
-	t += (float)XM_PI * 0.0125f;
+	static ULONGLONG timeStart = 0;
+	ULONGLONG timeCur = GetTickCount64();
+	if (timeStart == 0)
+		timeStart = timeCur;
+	t = (timeCur - timeStart) / 1000.0f;
 	World = XMMatrixRotationY(t);
 
 	for (int i = 0; i < sizeof(indices) / sizeof(WORD) / 3; i++)
@@ -381,20 +383,19 @@ void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hd
 					v.Tex = XMFLOAT2Add3(XMFLOAT2Mul(vertices[indices[0]].Tex, p_correct_bary.x),
 						XMFLOAT2Mul(vertices[indices[1]].Tex, p_correct_bary.y),
 						XMFLOAT2Mul(vertices[indices[2]].Tex, p_correct_bary.z));
-
+					
 					BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) =
-						Tex(v.Tex.x*Tex.GetWidth(), v.Tex.y*Tex.GetHeight());
+						getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
 				}
 			}
 		}
 	}
 }
 
-XMFLOAT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, double v)
+XMINT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, double v)
 {
-	int size = tex.GetWidth()*tex.GetHeight() * 3;
-	u *= size;
-	v *= size;
+	u *= tex.GetWidth()-1;
+	v *= tex.GetHeight()-1;
 	int x = floor(u);
 	int y = floor(v);
 	double u_ratio = u - x;
@@ -402,14 +403,25 @@ XMFLOAT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u
 	double u_opposite = 1 - u_ratio;
 	double v_opposite = 1 - v_ratio;
 	
-	double result_x = (tex(x,y).x * u_opposite + tex(x + 1,y).x * u_ratio) * v_opposite +
-		(tex(x, y+1).x * u_opposite + tex(x+1, y+1).x * u_ratio) * v_ratio;
-	double result_y = (tex(x, y).y * u_opposite + tex(x + 1, y).y * u_ratio) * v_opposite +
-		(tex(x, y + 1).y * u_opposite + tex(x + 1, y + 1).y * u_ratio) * v_ratio;
-	double result_z = (tex(x, y).z * u_opposite + tex(x + 1, y).z * u_ratio) * v_opposite +
-		(tex(x, y + 1).z * u_opposite + tex(x + 1, y + 1).z * u_ratio) * v_ratio;
+	double result_x, result_y, result_z;
+	if (x+1 >= tex.GetWidth() || y+1 >= tex.GetHeight())
+	{
+		result_x = tex(x, y).x;
+		result_y = tex(x, y).y;
+		result_z = tex(x, y).z;
+	}
+	else
+	{
+		result_x = (tex(x, y).x * u_opposite + tex(x + 1, y).x * u_ratio) * v_opposite +
+			(tex(x, y + 1).x * u_opposite + tex(x + 1, y + 1).x * u_ratio) * v_ratio;
+		result_y = (tex(x, y).y * u_opposite + tex(x + 1, y).y * u_ratio) * v_opposite +
+			(tex(x, y + 1).y * u_opposite + tex(x + 1, y + 1).y * u_ratio) * v_ratio;
+		result_z = (tex(x, y).z * u_opposite + tex(x + 1, y).z * u_ratio) * v_opposite +
+			(tex(x, y + 1).z * u_opposite + tex(x + 1, y + 1).z * u_ratio) * v_ratio;
 
-	return XMFLOAT3(result_x, result_y, result_z);
+	}
+	
+	return XMINT3(result_x, result_y, result_z);
 }
 
 

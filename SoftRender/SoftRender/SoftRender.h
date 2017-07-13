@@ -59,6 +59,8 @@ private:
 	XMMATRIX World;
 	XMMATRIX View;
 	XMMATRIX Project;
+	PAINTSTRUCT ps;
+	HDC hdc;
 
 
 	HRESULT InitWindow(HINSTANCE, int ,UINT, UINT);
@@ -78,7 +80,7 @@ private:
 	XMFLOAT3 transBaryCentric(const XMFLOAT2& p, const XMFLOAT2& p0, const XMFLOAT2& p1, const XMFLOAT2& p2);
 	XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
 	bool IsInTriangle(XMFLOAT3 p_bary);
-	XMFLOAT3 getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, double v);
+	XMINT3 getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, double v);
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

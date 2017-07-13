@@ -1,34 +1,32 @@
 ﻿  SoftRender.cpp
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(213): warning C4101: “hdc”: 未引用的局部变量
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(212): warning C4101: “ps”: 未引用的局部变量
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(259): warning C4244: “参数”: 从“float”转换到“int32_t”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(326): warning C4018: “<”: 有符号/无符号不匹配
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(327): warning C4018: “<”: 有符号/无符号不匹配
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(340): warning C4244: “参数”: 从“UINT”转换到“FLOAT”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(350): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(351): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(352): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(353): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(362): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(375): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(376): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(388): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(389): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(402): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(418): warning C4101: “p_bary”: 未引用的局部变量
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(462): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(464): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\buffer.h(79): warning C4018: “<”: 有符号/无符号不匹配
-  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\buffer.h(78): note: 编译 类 模板 成员函数 "void Buffer<FLOAT>::Clear(T)" 时
+h:\github\-\softrender\softrender\softrender.cpp(267): warning C4244: “参数”: 从“float”转换到“int32_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(338): warning C4018: “<”: 有符号/无符号不匹配
+h:\github\-\softrender\softrender\softrender.cpp(339): warning C4018: “<”: 有符号/无符号不匹配
+h:\github\-\softrender\softrender\softrender.cpp(352): warning C4244: “参数”: 从“UINT”转换到“FLOAT”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(362): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(363): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(364): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(365): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(374): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(387): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(399): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(400): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(407): warning C4018: “>=”: 有符号/无符号不匹配
+h:\github\-\softrender\softrender\softrender.cpp(424): warning C4244: “参数”: 从“double”转换到“int32_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(440): warning C4101: “p_bary”: 未引用的局部变量
+h:\github\-\softrender\softrender\softrender.cpp(484): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+h:\github\-\softrender\softrender\softrender.cpp(486): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+h:\github\-\softrender\softrender\buffer.h(79): warning C4018: “<”: 有符号/无符号不匹配
+  h:\github\-\softrender\softrender\buffer.h(78): note: 编译 类 模板 成员函数 "void Buffer<FLOAT>::Clear(T)" 时
           with
           [
               T=FLOAT
           ]
-  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\buffer.h(58): note: 参见对正在编译的函数 模板 实例化“void Buffer<FLOAT>::Clear(T)”的引用
+  h:\github\-\softrender\softrender\buffer.h(58): note: 参见对正在编译的函数 模板 实例化“void Buffer<FLOAT>::Clear(T)”的引用
           with
           [
               T=FLOAT
           ]
-  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.h(15): note: 参见对正在编译的 类 模板 实例化 "Buffer<FLOAT>" 的引用
-  SoftRender.vcxproj -> C:\Users\zhengyiming\Documents\资料\VS2017\SoftRender\Debug\SoftRender.exe
-  SoftRender.vcxproj -> C:\Users\zhengyiming\Documents\资料\VS2017\SoftRender\Debug\SoftRender.pdb (Partial PDB)
+  h:\github\-\softrender\softrender\softrender.h(15): note: 参见对正在编译的 类 模板 实例化 "Buffer<FLOAT>" 的引用
+  SoftRender.vcxproj -> H:\github\-\SoftRender\Debug\SoftRender.exe
+  SoftRender.vcxproj -> H:\github\-\SoftRender\Debug\SoftRender.pdb (Partial PDB)
