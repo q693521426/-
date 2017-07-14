@@ -1,15 +1,15 @@
-#include "SoftRender.h"
+﻿#include "SoftRender.h"
 #include <atlconv.h>
 #include <sstream>
 #include <directxcolors.h>
 #include <cstdio>
 #pragma warning(disable:4996)
 
-SoftRender::SoftRender() :timer(), paused(false),
-fullScreen(false), hWndCaption(L"SoftRender"),
-hInst(nullptr), hWnd(nullptr),
-screenWidth(0), screenHeight(0),
-mCamera()
+	SoftRender::SoftRender() :timer(), paused(false),
+	fullScreen(false), hWndCaption(L"SoftRender"),
+	hInst(nullptr), hWnd(nullptr),
+	screenWidth(0), screenHeight(0),
+	mCamera()
 {
 	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -78,7 +78,7 @@ void SoftRender::CreateTextureFromFile()
 	{
 		for (j = 0; j < height; j++)
 		{
-			Tex(i, j) = XMINT3(data[(j*width + i)*3], data[(j*width + i) * 3 + 1], data[(j*width + i) * 3 + 2]);
+			Tex(i, j) = XMINT3(data[(j*width + i) * 3], data[(j*width + i) * 3 + 1], data[(j*width + i) * 3 + 2]);
 		}
 	}
 
@@ -225,7 +225,7 @@ LRESULT CALLBACK SoftRender::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam,
 		return 0;
 	case WM_PAINT:
 	{
-	//	Render();
+		//	Render();
 		return 0;
 	}
 	default:
@@ -262,9 +262,9 @@ void SoftRender::Update(const GameTimer& gt)
 void SoftRender::Draw(HDC& hdc, const GameTimer& gt)
 {
 	using namespace DirectX;
-	XMINT3 color=XMINT3(Colors::MidnightBlue[0]*255,
-				Colors::MidnightBlue[1] * 255, 
-				Colors::MidnightBlue[2] * 255 );
+	XMINT3 color = XMINT3(Colors::MidnightBlue[0] * 255,
+		Colors::MidnightBlue[1] * 255,
+		Colors::MidnightBlue[2] * 255);
 	ClearRenderTargetView(hdc, color);
 	zBuffer.Resize(screenWidth, screenHeight, 1.0f);
 
@@ -327,17 +327,17 @@ void SoftRender::Draw(HDC& hdc, const GameTimer& gt)
 	if (timeStart == 0)
 		timeStart = timeCur;
 	t = (timeCur - timeStart) / 1000.0f;
-	World = XMMatrixRotationY(t);
+	World = XMMatrixRotationY(60);
 
 	for (int i = 0; i < sizeof(indices) / sizeof(WORD) / 3; i++)
-	//for (int i = 8; i < 9; i++)
+		//for (int i = 8; i < 9; i++)
 	{
 		DrawTriangle3D(vertices, indices + i * 3, hdc);
 	}
 
 	for (int i = 0; i < screenWidth; ++i)
 		for (int j = 0; j < screenHeight; ++j)
-			SetPixel(hdc, i, j, RGB((BackBuffer(i, j).x ), BackBuffer(i, j).y , BackBuffer(i, j).z ));
+			SetPixel(hdc, i, j, RGB((BackBuffer(i, j).x), BackBuffer(i, j).y, BackBuffer(i, j).z));
 
 }
 
@@ -380,9 +380,9 @@ void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hd
 				XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
 				if (updateZBuffer(XMFLOAT3(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, p_correct_bary.w)))
 				{
-					XMVECTOR v_tex=  XMLoadFloat2(&vertices[indices[0]].Tex) * XMVectorReplicate(p_correct_bary.x)
-									+ XMLoadFloat2(&vertices[indices[1]].Tex) * XMVectorReplicate(p_correct_bary.y)
-									+ XMLoadFloat2(&vertices[indices[2]].Tex) * XMVectorReplicate(p_correct_bary.z);
+					XMVECTOR v_tex = XMLoadFloat2(&vertices[indices[0]].Tex) * XMVectorReplicate(p_correct_bary.x)
+						+ XMLoadFloat2(&vertices[indices[1]].Tex) * XMVectorReplicate(p_correct_bary.y)
+						+ XMLoadFloat2(&vertices[indices[2]].Tex) * XMVectorReplicate(p_correct_bary.z);
 					XMStoreFloat2(&v.Tex, v_tex);
 
 					BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) =
@@ -395,17 +395,17 @@ void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hd
 
 XMINT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, double v)
 {
-	u *= tex.GetWidth()-1;
-	v *= tex.GetHeight()-1;
+	u *= tex.GetWidth() - 1;
+	v *= tex.GetHeight() - 1;
 	int x = floor(u);
 	int y = floor(v);
 	double u_ratio = u - x;
 	double v_ratio = v - y;
 	double u_opposite = 1 - u_ratio;
 	double v_opposite = 1 - v_ratio;
-	
+
 	double result_x, result_y, result_z;
-	if (x+1 >= tex.GetWidth() || y+1 >= tex.GetHeight())
+	if (x + 1 >= tex.GetWidth() || y + 1 >= tex.GetHeight())
 	{
 		result_x = tex(x, y).x;
 		result_y = tex(x, y).y;
@@ -421,7 +421,7 @@ XMINT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMINT3>& tex, double u, 
 			(tex(x, y + 1).z * u_opposite + tex(x + 1, y + 1).z * u_ratio) * v_ratio;
 
 	}
-	
+
 	return XMINT3(result_x, result_y, result_z);
 }
 
@@ -442,7 +442,7 @@ XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT2& p, const XMFLOAT2& p0, con
 	FLOAT det = (p1.y - p2.y)*(p0.x - p2.x) + (p2.x - p1.x)*(p0.y - p2.y);
 	FLOAT a = ((p1.y - p2.y)*(p.x - p2.x) + (p2.x - p1.x)*(p.y - p2.y)) / det;
 	FLOAT b = ((p2.y - p0.y)*(p.x - p2.x) + (p0.x - p2.x)*(p.y - p2.y)) / det;
-		
+
 	return XMFLOAT3(a, b, 1.0f - a - b);
 }
 
@@ -469,15 +469,16 @@ bool SoftRender::IsInTriangle(XMFLOAT3 p_bary)
 
 XMFLOAT3 SoftRender::transProSpace(const XMFLOAT3& p)
 {
-	XMFLOAT3 v_3f;
+	XMFLOAT4 v_4f;
 	XMVECTOR v;
 
 	View = mCamera.GetView();
 	Project = mCamera.GetProj();
 
-	v = XMVector4Normalize(XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), World*View*Project));
-	XMStoreFloat3(&v_3f, v);
-	return v_3f;
+	v = XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), World *View*Project);
+	XMStoreFloat4(&v_4f, v);
+
+	return XMFLOAT3(v_4f.x / v_4f.w, v_4f.y / v_4f.w, v_4f.z / v_4f.w);
 }
 
 bool SoftRender::updateZBuffer(const XMFLOAT3& v)
@@ -570,4 +571,3 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 	}
 	}
 }
-

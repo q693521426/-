@@ -9,6 +9,33 @@ Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2,FLOAT scale_x, FLOAT sc
 	Point3D[2] = p2;
 	for (int i = 0; i < 3; ++i)
 		Point2D[i] = XMFLOAT2(Point3D[i].x*scale_x, Point3D[i].y*scale_y);
+
+	XMVECTOR v0 = GetPoint3DPos(0);
+	XMVECTOR v1 = GetPoint3DPos(1);
+	XMVECTOR v2 = GetPoint3DPos(2);
+
+	XMVECTOR e0 = XMVectorSubtract(v1, v0);
+	XMVECTOR e1 = XMVectorSubtract(v2, v0);
+
+	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
+}
+
+Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
+{
+	Point3D.resize(3);
+	Point2D.resize(3);
+	Point3D[0] = p0;
+	Point3D[1] = p1;
+	Point3D[2] = p2;
+	
+	XMVECTOR v0 = GetPoint3DPos(0);
+	XMVECTOR v1 = GetPoint3DPos(1);
+	XMVECTOR v2 = GetPoint3DPos(2);
+
+	XMVECTOR e0 = XMVectorSubtract(v1, v0);
+	XMVECTOR e1 = XMVectorSubtract(v2, v0);
+
+	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
 }
 
 Triangle::~Triangle()
@@ -36,20 +63,26 @@ XMFLOAT2 Triangle::GetPoint2DPos2f(int index)const
 	return Point2D[index];
 }
 
+XMVECTOR Triangle::GetNormal()const
+{
+	return XMLoadFloat3(&normal);
+}
+
+XMFLOAT3 Triangle::GetNormal3f()const
+{
+	return normal;
+}
+
+void Triangle::SetNormal3f(const XMFLOAT3& normal)
+{
+	this->normal = normal;
+}
+
 bool Triangle::IsBackCulling(const XMVECTOR& LookAt)
 {
-	XMVECTOR p0 = GetPoint3DPos(0);
-	XMVECTOR p1 = GetPoint3DPos(1);
-	XMVECTOR p2 = GetPoint3DPos(2);
-	
-	XMVECTOR v0 = XMVectorSubtract(p1, p0);
-	XMVECTOR v1 = XMVectorSubtract(p2, p0);
-
-	XMVECTOR n = XMVector3Normalize(XMVector3Cross(v0, v1));
-
 	//Backface-culling
 	XMFLOAT3 dot;
-	XMStoreFloat3(&dot, XMVector3Dot(LookAt, n));
+	XMStoreFloat3(&dot, XMVector3Dot(LookAt, GetNormal()));
 	if (dot.x > 0)
 	{
 		return true;

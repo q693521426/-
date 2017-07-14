@@ -37,7 +37,7 @@ public:
 	SoftRender(const SoftRender&);
 	~SoftRender();
 
-	bool Initialize(HINSTANCE, int ,UINT ,UINT);
+	bool Initialize(HINSTANCE, int, UINT, UINT);
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 	int Run();
@@ -63,12 +63,12 @@ private:
 	HDC hdc;
 
 
-	HRESULT InitWindow(HINSTANCE, int ,UINT, UINT);
+	HRESULT InitWindow(HINSTANCE, int, UINT, UINT);
 
 	void CalculateFrameStats();
 	void OnKeyboardInput(const GameTimer& gt);
 	void Update(const GameTimer& gt);
-	void Draw(HDC& hdc,const GameTimer& gt);
+	void Draw(HDC& hdc, const GameTimer& gt);
 	void Render();
 	void ClearRenderTargetView(HDC& hdc, const XMINT3& ColorRBGA);
 	XMFLOAT3 transProSpace(const XMFLOAT3& p);
