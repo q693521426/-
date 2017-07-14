@@ -1,2 +1,28 @@
-﻿  SoftRender.vcxproj -> C:\Users\zhengyiming\-\SoftRender\Debug\SoftRender.exe
-  SoftRender.vcxproj -> C:\Users\zhengyiming\-\SoftRender\Debug\SoftRender.pdb (Partial PDB)
+﻿  SoftRender.cpp
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(406): warning C4244: “参数”: 从“UINT”转换到“FLOAT”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(418): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(419): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(420): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(421): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(430): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(449): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(461): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(462): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(469): warning C4018: “>=”: 有符号/无符号不匹配
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(491): warning C4101: “p_bary”: 未引用的局部变量
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(547): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(549): warning C4244: “参数”: 从“const float”转换到“::size_t”，可能丢失数据
+c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\buffer.h(92): warning C4018: “<”: 有符号/无符号不匹配
+  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\buffer.h(91): note: 编译 类 模板 成员函数 "void Buffer<FLOAT>::Clear(T)" 时
+          with
+          [
+              T=FLOAT
+          ]
+  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.cpp(293): note: 参见对正在编译的函数 模板 实例化“void Buffer<FLOAT>::Clear(T)”的引用
+          with
+          [
+              T=FLOAT
+          ]
+  c:\users\zhengyiming\documents\资料\vs2017\softrender\softrender\softrender.h(15): note: 参见对正在编译的 类 模板 实例化 "Buffer<FLOAT>" 的引用
+  SoftRender.vcxproj -> C:\Users\zhengyiming\Documents\资料\VS2017\SoftRender\Debug\SoftRender.exe
+  SoftRender.vcxproj -> C:\Users\zhengyiming\Documents\资料\VS2017\SoftRender\Debug\SoftRender.pdb (Partial PDB)

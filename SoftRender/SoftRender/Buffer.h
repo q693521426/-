@@ -14,15 +14,16 @@ public:
 	const size_t GetWidth()const;
 	const size_t GetHeight()const;
 
+	T** GetppBuffer();
+	void Initialize(size_t w, size_t h, T t);
 	void Resize(size_t w, size_t h);
 	void Resize(size_t w, size_t h, T t);
 	void Clear(T);
 	void Release();
 	const T& operator()(size_t x,size_t y)const;
 	T& operator()(size_t x, size_t y);
-	
 private:
-	std::vector<T> buffer;
+	T* buffer;
 	size_t width;
 	size_t height;
 };
@@ -49,10 +50,21 @@ const size_t Buffer<T>::GetHeight()const
 }
 
 template<typename T>
+void Buffer<T>::Initialize(size_t w, size_t h, T t)
+{
+	buffer = (T*)malloc(w*h * sizeof(T));
+	//buffer.resize(w*h);
+	width = w;
+	height = h;
+	Clear(t);
+}
+
+template<typename T>
 void Buffer<T>::Resize(size_t w, size_t h, T t)
 {
 	Release();
-	buffer.resize(w*h);
+	//buffer.resize(w*h);
+	buffer = (T*)malloc(w*h * sizeof(T));
 	width = w;
 	height = h;
 	Clear(t);
@@ -62,7 +74,8 @@ template<typename T>
 void Buffer<T>::Resize(size_t w, size_t h)
 {
 	Release();
-	buffer.resize(w*h);
+	//buffer.resize(w*h);
+	buffer = (T*)malloc(w*h * sizeof(T));
 	width = w;
 	height = h;
 }
@@ -70,13 +83,13 @@ void Buffer<T>::Resize(size_t w, size_t h)
 template<typename T>
 void Buffer<T>::Release()
 {
-	buffer.clear();
+
 }
 
 template<typename T>
 void Buffer<T>::Clear(T t)
 {
-	for (int i = 0; i < buffer.size(); ++i)
+	for (int i = 0; i < width*height; ++i)
 	{
 		buffer[i] = t;
 	}
@@ -96,6 +109,12 @@ T& Buffer<T>::operator()(size_t x, size_t y)
 	return const_cast<T&>
 		(static_cast<const Buffer<T>&>
 		(*this)(x, y));
+}
+
+template<typename T>
+T** Buffer<T>::GetppBuffer()
+{
+	return &buffer;
 }
 
 #endif
