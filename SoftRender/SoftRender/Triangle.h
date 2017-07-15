@@ -12,24 +12,31 @@ class Triangle
 {
 public:
 	Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2);
-	Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2, FLOAT scale_x, FLOAT scale_y);
+	Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2, FLOAT scale_x, FLOAT scale_y,WORD indices[3]);
 	~Triangle();
 
 	XMVECTOR GetPoint3DPos(int index)const;
 	XMFLOAT3 GetPoint3DPos3f(int index)const;
 
 	XMVECTOR GetPoint2DPos(int index)const;
-	XMFLOAT2 GetPoint2DPos2f(int index)const;
+	XMFLOAT3 GetPoint2DPos3f(int index)const;
 	
 	XMVECTOR GetNormal()const;
 	XMFLOAT3 GetNormal3f()const;
 	void SetNormal3f(const XMFLOAT3& normal);
 
+	WORD GetIndex(int index)const;
+	INT* GetOrder()const;
+
 	bool IsBackCulling(const XMVECTOR& LookAt);
+	void sort_2D_x();
+
 private:
 	std::vector<XMFLOAT3> Point3D;
-	std::vector<XMFLOAT2> Point2D;
+	std::vector<XMFLOAT3> Point2D;
 	XMFLOAT3 normal;
+	WORD* indices;
+	INT* order;
 };
 
 #endif

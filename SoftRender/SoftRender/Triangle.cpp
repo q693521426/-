@@ -1,14 +1,16 @@
 #include "Triangle.h"
 
-Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2,FLOAT scale_x, FLOAT scale_y)
+Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2,FLOAT scale_x, FLOAT scale_y, WORD indices[3])
 {
+	this->indices = indices;
+	this->order = new INT[3]{ 0,1,2 };
 	Point3D.resize(3);
 	Point2D.resize(3);
 	Point3D[0] = p0;
 	Point3D[1] = p1;
 	Point3D[2] = p2;
 	for (int i = 0; i < 3; ++i)
-		Point2D[i] = XMFLOAT2(Point3D[i].x*scale_x, Point3D[i].y*scale_y);
+		Point2D[i] = XMFLOAT3(Point3D[i].x*scale_x, Point3D[i].y*scale_y, Point3D[i].z);
 
 	XMVECTOR v0 = GetPoint3DPos(0);
 	XMVECTOR v1 = GetPoint3DPos(1);
@@ -18,10 +20,13 @@ Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2,FLOAT scale_x, FLOAT sc
 	XMVECTOR e1 = XMVectorSubtract(v2, v0);
 
 	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
+
 }
 
 Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
 {
+	this->indices = nullptr;
+	this->order = new INT[3]{ 0,1,2 };
 	Point3D.resize(3);
 	Point2D.resize(3);
 	Point3D[0] = p0;
@@ -40,27 +45,27 @@ Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
 
 Triangle::~Triangle()
 {
-	
+	delete order;
 }
 
 XMVECTOR Triangle::GetPoint3DPos(int index)const
 {
-	return XMLoadFloat3(&Point3D[index]);
+	return XMLoadFloat3(&Point3D[order[index]]);
 }
 
 XMFLOAT3 Triangle::GetPoint3DPos3f(int index)const
 {
-	return Point3D[index];
+	return Point3D[order[index]];
 }
 
 XMVECTOR Triangle::GetPoint2DPos(int index)const
 {
-	return XMLoadFloat2(&Point2D[index]);
+	return XMLoadFloat3(&Point2D[order[index]]);
 }
 
-XMFLOAT2 Triangle::GetPoint2DPos2f(int index)const
+XMFLOAT3 Triangle::GetPoint2DPos3f(int index)const
 {
-	return Point2D[index];
+	return Point2D[order[index]];
 }
 
 XMVECTOR Triangle::GetNormal()const
@@ -88,4 +93,32 @@ bool Triangle::IsBackCulling(const XMVECTOR& LookAt)
 		return true;
 	}
 	return false;
+}
+
+void Triangle::sort_2D_x()
+{
+	if (GetPoint3DPos3f(0).x > GetPoint3DPos3f(1).x)
+	{
+		std::swap(order[0], order[1]);
+	}
+
+	if (GetPoint3DPos3f(0).x > GetPoint3DPos3f(2).x)
+	{
+		std::swap(order[0], order[2]);
+	}
+
+	if (GetPoint3DPos3f(1).x > GetPoint3DPos3f(2).x)
+	{
+		std::swap(order[1], order[2]);
+	}
+}
+
+WORD Triangle::GetIndex(int index)const
+{
+	return indices[order[index]];
+}
+
+INT* Triangle::GetOrder()const
+{
+	return order;
 }

@@ -16,6 +16,7 @@ public:
 
 	T** GetppBuffer();
 	void Initialize(size_t w, size_t h, T t);
+	void Initialize(size_t w, size_t h);
 	void Resize(size_t w, size_t h);
 	void Resize(size_t w, size_t h, T t);
 	void Clear(T);
@@ -60,6 +61,15 @@ void Buffer<T>::Initialize(size_t w, size_t h, T t)
 }
 
 template<typename T>
+void Buffer<T>::Initialize(size_t w, size_t h)
+{
+	//buffer.resize(w*h);
+	width = w;
+	height = h;
+}
+
+
+template<typename T>
 void Buffer<T>::Resize(size_t w, size_t h, T t)
 {
 	Release();
@@ -83,7 +93,7 @@ void Buffer<T>::Resize(size_t w, size_t h)
 template<typename T>
 void Buffer<T>::Release()
 {
-
+	delete[] buffer;
 }
 
 template<typename T>

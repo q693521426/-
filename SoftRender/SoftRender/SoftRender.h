@@ -24,6 +24,13 @@ struct SimpleVertex
 	XMFLOAT3 Normal;
 };
 
+struct VS_OUT
+{
+	SimpleVertex* vs_out;
+	WORD* indices;
+	VS_OUT(SimpleVertex* vs_out,WORD* indices):vs_out(vs_out),indices(indices){}
+};
+
 struct SimpleVertex2D
 {
 	XMFLOAT2 Pos;
@@ -43,19 +50,22 @@ public:
 	int Run();
 	void Shutdown();
 
+public:
+	static int screenWidth;
+	static int screenHeight;
+	static Buffer<INT> BackBuffer;
+	static Buffer<FLOAT> zBuffer;
+	static Buffer<INT> Tex;
+	static SimpleVertex *vs_out;
+	static HANDLE* hThread;
 private:
 	GameTimer timer;
 	bool paused;
 	HINSTANCE hInst;
 	HWND hWnd;
-	UINT screenWidth;
-	UINT screenHeight;
 	bool fullScreen;
 	std::wstring hWndCaption;
 	Camera mCamera;
-	Buffer<INT> BackBuffer;
-	Buffer<FLOAT> zBuffer;
-	Buffer<INT> Tex;
 	XMMATRIX World;
 	XMMATRIX View;
 	XMMATRIX Project;
@@ -64,7 +74,9 @@ private:
 	HDC backbuffDC;
 	HBITMAP backbuffer;
 	HBITMAP now_bitmap;
-
+	XMFLOAT3 LightPos;
+	XMMATRIX LightView;
+	XMMATRIX LightProject;
 
 	HRESULT InitWindow(HINSTANCE, int ,UINT, UINT);
 
@@ -73,16 +85,19 @@ private:
 	void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
 	void Render();
-	void ClearRenderTargetView(INT ColorRBGA);
+	//void ClearRenderTargetView(INT ColorRBGA);
 	XMFLOAT3 transProSpace(const XMFLOAT3& p);
 	XMFLOAT3 transWorldSpace(const XMFLOAT3& p);
-	void SoftRender::DrawTriangle3D(SimpleVertex* vertices, WORD indices[3], HDC& hdc);
-	bool updateZBuffer(const XMFLOAT3& v);
-	void CreateTextureFromFile();
-	XMFLOAT3 transBaryCentric(const XMFLOAT2& p, const XMFLOAT2& p0, const XMFLOAT2& p1, const XMFLOAT2& p2);
-	XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
-	bool IsInTriangle(XMFLOAT3 p_bary);
-	INT getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v);
+	static DWORD WINAPI DrawTriangle3D(LPVOID lpParameter);
+	static void DrawVextex(SimpleVertex& v, const Triangle& t);
+	//void sort_x(XMFLOAT3& a, XMFLOAT3& b, XMFLOAT3& c);
+	static FLOAT slope(const XMFLOAT3& a, const XMFLOAT3& b);
+	static bool updateZBuffer(const XMFLOAT3& v);
+	static void CreateTextureFromFile();
+	static XMFLOAT3 transBaryCentric(const XMFLOAT3& p, const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
+	static XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
+	static bool IsInTriangle(XMFLOAT3 p_bary);
+	static INT getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v);
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

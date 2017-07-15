@@ -70,7 +70,7 @@ public:
 	template<typename T>
 	static bool IsClamp(const T& x, const T& low, const T& high)
 	{
-		if (x >= low && x <= high)
+		if (x >= low && x < high)
 			return true;
 		else
 			return false;

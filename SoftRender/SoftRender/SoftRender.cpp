@@ -5,14 +5,82 @@
 #include <cstdio>
 #pragma warning(disable:4996)
 
+SimpleVertex vertices[]
+{
+	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+};
+
+WORD indices[]
+{
+	3,1,0,
+	2,1,3,
+
+	6,4,5,
+	7,4,6,
+
+	11,9,8,
+	10,9,11,
+
+	14,12,13,
+	15,12,14,
+
+	19,17,16,
+	18,17,19,
+
+	22,20,21,
+	23,20,22
+};
+
+int vertexNum = 24;
+int triangleNum = 12;
+
+INT backColor = (INT)(Colors::MidnightBlue[0] * 255) << 16
+| (INT)(Colors::MidnightBlue[1] * 255) << 8
+| (INT)(Colors::MidnightBlue[2] * 255);
+
+int SoftRender::screenWidth=800;
+int SoftRender::screenHeight=600;
+Buffer<INT> SoftRender::BackBuffer;
+Buffer<FLOAT> SoftRender::zBuffer;
+Buffer<INT> SoftRender::Tex;
+SimpleVertex* SoftRender::vs_out= new SimpleVertex[vertexNum];
+HANDLE* SoftRender::hThread=new HANDLE[triangleNum];
+
 SoftRender::SoftRender() :timer(), paused(false),
 fullScreen(false), hWndCaption(L"SoftRender"),
 hInst(nullptr), hWnd(nullptr),
-screenWidth(0), screenHeight(0),
 mCamera()
 {
 	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
-	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mCamera.LookAt(Eye, At, Up);
 	mCamera.UpdateViewMatrix();
@@ -101,13 +169,9 @@ int SoftRender::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-		/*	timer.Tick();
-			CalculateFrameStats();
-			Update(timer);*/
-		}
-
+		timer.Tick();
+		CalculateFrameStats();
+		Update(timer);
 		Render();
 	}
 
@@ -123,7 +187,7 @@ void SoftRender::Render()
 
 void SoftRender::Shutdown()
 {
-	BackBuffer.Release();
+//	BackBuffer.Release();
 	zBuffer.Release();
 }
 
@@ -220,11 +284,22 @@ HRESULT SoftRender::InitWindow(HINSTANCE hInstance, int nCmdShow, UINT screenWid
 	INT color = (INT)(Colors::MidnightBlue[0] * 255) << 16
 		| (INT)(Colors::MidnightBlue[1] * 255) << 8
 		| (INT)(Colors::MidnightBlue[2] * 255);
-	zBuffer.Initialize(screenWidth, screenHeight, 1.0f);
-	BackBuffer.Initialize(screenWidth, screenHeight, color);
+
+	zBuffer.Initialize(screenWidth, screenHeight,1.0f);
+	BackBuffer.Initialize(screenWidth, screenHeight);
 	now_bitmap = CreateDIBSection(backbuffDC, &bmp_info, DIB_RGB_COLORS, (void**)(BackBuffer.GetppBuffer()), NULL, 0);
-	BackBuffer.Clear(color);
-	
+
+	LightPos = XMFLOAT3(0.0f, 3.0f, 0.0f);
+	LightView = MathHelper::LookAt(LightPos, XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 1.0f, 0.f));
+	LightProject = XMMatrixPerspectiveFovLH(MathHelper::Pi * 2 / 3, screenWidth / (FLOAT)screenHeight, 1.0f, 100.0f);
+
+	for (int i = 0; i <triangleNum ; ++i)
+	{
+		//fragTex
+		vs_out[indices[i * 3]].Tex = vertices[indices[i * 3]].Tex;
+		vs_out[indices[i * 3 + 1]].Tex = vertices[indices[i * 3 + 1]].Tex;
+		vs_out[indices[i * 3 + 2]].Tex = vertices[indices[i * 3 + 2]].Tex;
+	}
 	//	RestoreDC(backbuffDC, savedDC);
 	UpdateWindow(hWnd);
 
@@ -285,101 +360,32 @@ void SoftRender::Update(const GameTimer& gt)
 
 void SoftRender::Draw(const GameTimer& gt)
 {
-	using namespace DirectX;
-	INT color=(INT)(Colors::MidnightBlue[0]*255) <<16 
-				| (INT)(Colors::MidnightBlue[1] * 255) <<8
-				| (INT)(Colors::MidnightBlue[2] * 255) ;
-	ClearRenderTargetView( color);
 	zBuffer.Clear(1.0f);
-
-	SimpleVertex vertices[] =
-	{
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-	};
-	SimpleVertex *vs_out = new SimpleVertex[sizeof(vertices) / sizeof(SimpleVertex)]();
-
-	WORD indices[] =
-	{
-		3,1,0,
-		2,1,3,
-
-		6,4,5,
-		7,4,6,
-
-		11,9,8,
-		10,9,11,
-
-		14,12,13,
-		15,12,14,
-
-		19,17,16,
-		18,17,19,
-
-		22,20,21,
-		23,20,22
-	};
-	XMFLOAT3 LightPos = XMFLOAT3(0.0f,3.0f,0.0f);
-	XMMATRIX LightView = MathHelper::LookAt(LightPos, XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 1.0f, 0.f));
-	XMMATRIX LightProject = XMMatrixPerspectiveFovLH(MathHelper::Pi*2/3, screenWidth/(FLOAT)screenHeight, 1.0f, 100.0f);
-
-	static float t = 0.0f;
-	static ULONGLONG timeStart = 0;
-	ULONGLONG timeCur = GetTickCount64();
-	if (timeStart == 0)
-		timeStart = timeCur;
-	t = (timeCur - timeStart) / 1000.0f;
-	World = XMMatrixRotationY(t);
-
+	BackBuffer.Clear(backColor);
+	
+	World = XMMatrixRotationY(gt.TotalTime());
+	
 	//for (int i = 8; i < 9; i++)
-	for (int i = 0; i < sizeof(indices) / sizeof(*indices) / 3; ++i)
+	for (int i = 0; i < triangleNum; ++i)
 	{
 		//normal
 		Triangle t_3d(vertices[indices[i*3]].Pos, vertices[indices[i * 3+1]].Pos, vertices[indices[i * 3+2]].Pos);
 
-		for (int j = 0; j<3; ++j)
-			XMStoreFloat3(&vertices[indices[j]].Normal,
-			(XMLoadFloat3((&vertices[indices[j]].Normal)) + t_3d.GetNormal()));
-		
+		for (int j = 0; j < 3; ++j)
+		{
+			vertices[indices[j]].Normal.x += t_3d.GetNormal3f().x;
+			vertices[indices[j]].Normal.y += t_3d.GetNormal3f().y;
+			vertices[indices[j]].Normal.z += t_3d.GetNormal3f().z;
+		}
+
 		//fragPos
 		vs_out[indices[i * 3]].Pos = transWorldSpace(vertices[indices[i * 3]].Pos);
 		vs_out[indices[i * 3 + 1]].Pos = transWorldSpace(vertices[indices[i * 3 + 1]].Pos);
 		vs_out[indices[i * 3 + 2]].Pos = transWorldSpace(vertices[indices[i * 3 + 2]].Pos);
 
-		//fragTex
-		vs_out[indices[i * 3]].Tex = vertices[indices[i * 3]].Tex;
-		vs_out[indices[i * 3 + 1]].Tex = vertices[indices[i * 3+1]].Tex;
-		vs_out[indices[i * 3 + 2]].Tex = vertices[indices[i * 3+2]].Tex;
 		//DrawTriangle3D(vertices, indices + i * 3, hdc);
 	}
-	for (int i = 0; i < sizeof(vertices) / sizeof(*vertices); ++i)
+	for (int i = 0; i < vertexNum; ++i)
 	{
 		//frag_normal
 		XMStoreFloat3(&vertices[i].Normal, 
@@ -389,69 +395,177 @@ void SoftRender::Draw(const GameTimer& gt)
 			MathHelper::InverseTranspose(World)));
 	}
 
-	for (int i = 0; i < sizeof(indices) / sizeof(*indices) / 3; ++i)
+	for (int i = 0; i < triangleNum; ++i)
 	{
-		DrawTriangle3D(vs_out, indices + i * 3, hdc);
+		XMFLOAT3 p0 = transProSpace(vs_out[indices[i*3]].Pos);
+		XMFLOAT3 p1 = transProSpace(vs_out[indices[i * 3 + 1]].Pos);
+		XMFLOAT3 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);
+
+		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
+		if (t->IsBackCulling(mCamera.GetLook()))
+		{
+			continue;
+		}
+
+		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
+		//DrawTriangle3D(vs_out, indices + i * 3);
 	}
-	delete[] vs_out;
+	//DWORD* exitCode = new DWORD[triangleNum];
+	//while (1)
+	//{
+	//	int i;
+	//	for(i=0;i<triangleNum;++i)
+	//		GetExitCodeThread(hThread[i],exitCode+i);
+	//	for (i = 0; i < triangleNum; ++i)
+	//	{
+	//		if (exitCode[i] != STILL_ACTIVE)
+	//		{
+	//			break;
+	//		}
+	//	}
+	//	if (i == triangleNum)
+	//		break;
+	//}
+	int tempNumThreads = triangleNum;
+	int tempMax = 0;
+	while (tempNumThreads >= MAXIMUM_WAIT_OBJECTS)
+	{
+		tempNumThreads -= MAXIMUM_WAIT_OBJECTS;
+		WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &hThread[tempMax], TRUE, INFINITE);
+		tempMax += MAXIMUM_WAIT_OBJECTS;
+	}
+	Sleep(1000 / 120);
+	for (int i = 0; i < triangleNum; ++i)
+		CloseHandle(hThread[i]);
+
 }
 
-void SoftRender::DrawTriangle3D(SimpleVertex* vs_out, WORD indices[3], HDC& hdc)
+DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
+//void SoftRender::DrawTriangle3D(SimpleVertex* vs_out, const WORD indices[3])
 {
+	Triangle* t = (Triangle*)(lpParameter);
 	//position
-	XMFLOAT3 p0 = transProSpace(vs_out[indices[0]].Pos);
-	XMFLOAT3 p1 = transProSpace(vs_out[indices[1]].Pos);
-	XMFLOAT3 p2 = transProSpace(vs_out[indices[2]].Pos);
-
-	Triangle t(p0, p1, p2, screenWidth / 2, screenHeight / 2);
 	
 	//back-culling
-	if (t.IsBackCulling(mCamera.GetLook()))
-	{
-		return;
-	}
+	t->sort_2D_x();
 
-	XMFLOAT2 p0_2f = t.GetPoint2DPos2f(0);
-	XMFLOAT2 p1_2f = t.GetPoint2DPos2f(1);
-	XMFLOAT2 p2_2f = t.GetPoint2DPos2f(2);
+	XMFLOAT3 p0_3f = t->GetPoint2DPos3f(0);
+	XMFLOAT3 p1_3f = t->GetPoint2DPos3f(1);
+	XMFLOAT3 p2_3f = t->GetPoint2DPos3f(2);
 
-	int left = MathHelper::Min(p0_2f.x, p1_2f.x, p2_2f.x);
-	int right = MathHelper::Max(p0_2f.x, p1_2f.x, p2_2f.x);
-	int top = MathHelper::Max(p0_2f.y, p1_2f.y, p2_2f.y);
-	int bottom = MathHelper::Min(p0_2f.y, p1_2f.y, p2_2f.y);
+	int left = floorf(p0_3f.x);
+	int right = ceil(p2_3f.x);
+	int top = floorf(MathHelper::Max(p0_3f.y, p1_3f.y, p2_3f.y));
+	int bottom = ceilf(MathHelper::Min(p0_3f.y, p1_3f.y, p2_3f.y));
 	int scanWidth = right - left;
 	int scanHeight = top - bottom;
 
-	for (int i = 0; i < scanWidth; ++i)
+	float k01 = slope(p0_3f, p1_3f);
+	float k02 = slope(p0_3f, p2_3f);
+	float k12 = slope(p1_3f, p2_3f);
+
+	float y_top = p0_3f.y;
+	float y_bottom = p0_3f.y;
+
+	for (int i = 0; i <= floorf(p1_3f.x)-left; ++i)
 	{
-		for (int j = 0; j < scanHeight; ++j)
+		for (int j = ceilf(y_bottom); j <= floorf(y_top); ++j)
 		{
-			SimpleVertex2D v;
-			v.Pos = XMFLOAT2(left + i, bottom + j);
-			
-			//bary-centric
-			XMFLOAT3 p_bary = transBaryCentric(v.Pos, p0_2f, p1_2f, p2_2f);
-			if (IsInTriangle(p_bary) &&
-				MathHelper::IsClamp(v.Pos.x, screenWidth / -2.0f, screenWidth / 2.0f) &&
-				MathHelper::IsClamp(v.Pos.y, screenHeight / -2.0f, screenHeight / 2.0f))
-			{
-				//perspective-correct
-				XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
-				if (updateZBuffer(XMFLOAT3(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, p_correct_bary.w)))
-				{
-
-					XMVECTOR v_tex=  XMLoadFloat2(&vs_out[indices[0]].Tex) * XMVectorReplicate(p_correct_bary.x)
-									+ XMLoadFloat2(&vs_out[indices[1]].Tex) * XMVectorReplicate(p_correct_bary.y)
-									+ XMLoadFloat2(&vs_out[indices[2]].Tex) * XMVectorReplicate(p_correct_bary.z);
-					XMStoreFloat2(&v.Tex, v_tex);
-
-					//bilinear-filter
-					BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) =
-						getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
-				}
-			}
+			SimpleVertex v;
+			v.Pos = XMFLOAT3(left + i, j, 0);
+			DrawVextex(v, *t);
+		}
+		if (k01 > k02)
+		{
+			y_top = y_top + k01;
+			y_bottom = y_bottom + k02;
+		}
+		else
+		{
+			y_top = y_top + k02;
+			y_bottom = y_bottom + k01;
 		}
 	}
+
+	y_top = p2_3f.y;
+	y_bottom = p2_3f.y;
+
+	for (int i = 0; i <= right - ceil(p1_3f.x); ++i)
+	{
+		if (y_top < y_bottom)
+			std::swap(y_top, y_bottom);
+
+		for (int j = ceilf(y_bottom); j <= floorf(y_top); ++j)
+		{
+			SimpleVertex v;
+			v.Pos = XMFLOAT3(right - i, j, 0);
+			DrawVextex(v,*t);
+		}
+		if (k12 < k02)
+		{
+			y_top = y_top - k12;
+			y_bottom = y_bottom - k02;
+		}
+		else
+		{
+			y_top = y_top - k02;
+			y_bottom = y_bottom - k12;
+		}
+	}
+
+	//for (int i = 0; i < scanWidth; ++i)
+	//{
+	//	for (int j = 0; j < scanHeight; ++j)
+	//	{
+	//		SimpleVertex v;
+	//		v.Pos = XMFLOAT3(left + i, bottom + j,0.0f);
+	//		
+	//		DrawVextex(v, p0_3f, p1_3f, p2_3f, indices, t.GetIndex());
+	//	}
+	//}
+	delete t;
+	return 0;
+}
+
+void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
+{
+	if (!MathHelper::IsClamp((int)(ceilf(screenWidth / 2.0f) + v.Pos.x), 0, screenWidth)
+		|| !MathHelper::IsClamp((int)(ceilf(screenHeight / 2.0f) + v.Pos.y), 0, screenHeight))
+		return;
+	//bary-centric
+	XMFLOAT3 p0 = t.GetPoint2DPos3f(0);
+	XMFLOAT3 p1 = t.GetPoint2DPos3f(1);
+	XMFLOAT3 p2 = t.GetPoint2DPos3f(2);
+
+	XMFLOAT3 p_bary = transBaryCentric(v.Pos, p0, p1, p2);
+	if (IsInTriangle(p_bary))
+	{
+		//perspective-correct
+		XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
+		v.Pos.z = p_correct_bary.w;
+		if (updateZBuffer(XMFLOAT3(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y, v.Pos.z)))
+		{
+
+			v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_correct_bary.x
+				+ vs_out[t.GetIndex(1)].Tex.x * p_correct_bary.y
+				+ vs_out[t.GetIndex(2)].Tex.x * p_correct_bary.z;
+
+			v.Tex.y = vs_out[t.GetIndex(0)].Tex.y * p_correct_bary.x
+				+ vs_out[t.GetIndex(1)].Tex.y * p_correct_bary.y
+				+ vs_out[t.GetIndex(2)].Tex.y * p_correct_bary.z;
+
+			//bilinear-filter
+			BackBuffer(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y) =
+				getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
+		}
+	}
+}
+
+FLOAT SoftRender::slope(const XMFLOAT3& a, const XMFLOAT3& b)
+{
+	if (a.x - b.x == 0)
+		return INFINITY;
+	return (a.y - b.y) / (a.x - b.x);
 }
 
 INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v)
@@ -466,6 +580,10 @@ INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double
 	double v_opposite = 1 - v_ratio;
 	
 	double result_x, result_y, result_z;
+
+	x = MathHelper::Clamp(x, 0, (int)tex.GetWidth()-1);
+	y = MathHelper::Clamp(y, 0, (int)tex.GetHeight()-1);
+
 	if (x+1 >= tex.GetWidth() || y+1 >= tex.GetHeight())
 	{
 		result_x = ((tex(x, y) >> 16) & 0xFF);
@@ -486,7 +604,7 @@ INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double
 	return (int)result_x<<16 | (int)result_y<<8 | (int)result_z;
 }
 
-XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT2& p, const XMFLOAT2& p0, const XMFLOAT2& p1, const XMFLOAT2& p2)
+XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT3& p, const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
 {
 	XMFLOAT3 p_bary;
 	FLOAT det = (p1.y - p2.y)*(p0.x - p2.x) + (p2.x - p1.x)*(p0.y - p2.y);
@@ -569,11 +687,6 @@ bool SoftRender::updateZBuffer(const XMFLOAT3& v)
 //	v3.y = (v4.w == 0.f ? v4.y : v4.y / v4.w);
 //	v3.z = (v4.w == 0.f ? v4.z : v4.z / v4.w);
 //}
-
-void SoftRender::ClearRenderTargetView(INT ColorRBGA)
-{
-	BackBuffer.Clear(ColorRBGA);
-}
 
 void SoftRender::CalculateFrameStats()
 {

@@ -128,7 +128,7 @@ void Camera::SetLens(float fovY, float aspect, float zn, float zf)
 void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp)
 {
 	XMVECTOR L = XMVector3Normalize(XMVectorSubtract(target, pos));
-	XMVECTOR R = XMVector3Normalize(XMVector3Cross(worldUp, L));
+	XMVECTOR R = XMVector3Normalize(XMVector3Cross(L,worldUp));
 	XMVECTOR U = XMVector3Cross(L, R);
 
 	XMStoreFloat3(&mPosition, pos);
