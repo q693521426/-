@@ -3,6 +3,8 @@
 #include <sstream>
 #include <directxcolors.h>
 #include <cstdio>
+#include <omp.h>
+
 #pragma warning(disable:4996)
 
 SimpleVertex vertices[]
@@ -61,6 +63,7 @@ WORD indices[]
 
 int vertexNum = 24;
 int triangleNum = 12;
+int shininess = 60;
 
 INT backColor = (INT)(Colors::MidnightBlue[0] * 255) << 16
 | (INT)(Colors::MidnightBlue[1] * 255) << 8
@@ -73,17 +76,32 @@ Buffer<FLOAT> SoftRender::zBuffer;
 Buffer<INT> SoftRender::Tex;
 SimpleVertex* SoftRender::vs_out= new SimpleVertex[vertexNum];
 HANDLE* SoftRender::hThread=new HANDLE[triangleNum];
+LightInfo SoftRender::Light;
+XMFLOAT3 SoftRender::ViewPos = XMFLOAT3(0.0f, 3.0f, -6.0f);
+
+
 
 SoftRender::SoftRender() :timer(), paused(false),
 fullScreen(false), hWndCaption(L"SoftRender"),
 hInst(nullptr), hWnd(nullptr),
 mCamera()
 {
-	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+	XMVECTOR Eye = XMVectorSet(ViewPos.x, ViewPos.y, ViewPos.z, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mCamera.LookAt(Eye, At, Up);
 	mCamera.UpdateViewMatrix();
+
+	Light.Pos = XMFLOAT3(0.0f, 2.0f, -2.0f);
+	Light.Color = XMFLOAT3(1.0f,1.0f,1.0f);
+	Light.View = MathHelper::LookAt(Light.Pos, XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 1.0f, 0.f));
+	Light.Project = XMMatrixPerspectiveFovLH(MathHelper::Pi * 2 / 3, screenWidth / (FLOAT)screenHeight, 1.0f, 100.0f);
+	Light.Ambient = XMFLOAT3(0.05f, 0.05f, 0.05f);
+	Light.Diffuse = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	Light.Specular = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	Light.Constant = 1.0f;
+	Light.Linear = 0.009;
+	Light.Quadratic = 0.0032;
 }
 
 SoftRender::SoftRender(const SoftRender& s)
@@ -289,10 +307,6 @@ HRESULT SoftRender::InitWindow(HINSTANCE hInstance, int nCmdShow, UINT screenWid
 	BackBuffer.Initialize(screenWidth, screenHeight);
 	now_bitmap = CreateDIBSection(backbuffDC, &bmp_info, DIB_RGB_COLORS, (void**)(BackBuffer.GetppBuffer()), NULL, 0);
 
-	LightPos = XMFLOAT3(0.0f, 3.0f, 0.0f);
-	LightView = MathHelper::LookAt(LightPos, XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 1.0f, 0.f));
-	LightProject = XMMatrixPerspectiveFovLH(MathHelper::Pi * 2 / 3, screenWidth / (FLOAT)screenHeight, 1.0f, 100.0f);
-
 	for (int i = 0; i <triangleNum ; ++i)
 	{
 		//fragTex
@@ -426,15 +440,56 @@ void SoftRender::Draw(const GameTimer& gt)
 	//	if (i == triangleNum)
 	//		break;
 	//}
-	int tempNumThreads = triangleNum;
+	/*int tempNumThreads = triangleNum;
 	int tempMax = 0;
 	while (tempNumThreads >= MAXIMUM_WAIT_OBJECTS)
 	{
 		tempNumThreads -= MAXIMUM_WAIT_OBJECTS;
 		WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &hThread[tempMax], TRUE, INFINITE);
 		tempMax += MAXIMUM_WAIT_OBJECTS;
+	}*/
+	/*DWORD dwRet = 0;
+	int nIndex = 0;
+	while (1)
+	{
+		dwRet = WaitForMultipleObjects(triangleNum, hThread, FALSE, INFINITE);
+		switch (dwRet)
+		{
+		case WAIT_TIMEOUT:
+			break;
+		case WAIT_FAILED:
+			return ;
+		default:
+		{
+			nIndex = dwRet - WAIT_OBJECT_0;
+			nIndex++;
+			while (nIndex < triangleNum)
+			{
+				dwRet = WaitForMultipleObjects(triangleNum - nIndex, &hThread[nIndex], false, INFINITE);
+				switch (dwRet)
+				{
+				case WAIT_TIMEOUT:
+					nIndex = triangleNum; 
+					break;
+				case WAIT_FAILED:
+					return;
+				default:
+				{
+					nIndex = nIndex + dwRet - WAIT_OBJECT_0;
+					nIndex++;
+				}
+				break;
+				}
+			}
+		}
+		break;
+		}
+	}*/
+	for (int i = 0; i < triangleNum; ++i)
+	{
+		WaitForSingleObject(hThread[i], INFINITE);
 	}
-	Sleep(1000 / 120);
+
 	for (int i = 0; i < triangleNum; ++i)
 		CloseHandle(hThread[i]);
 
@@ -545,7 +600,7 @@ void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
 		v.Pos.z = p_correct_bary.w;
 		if (updateZBuffer(XMFLOAT3(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y, v.Pos.z)))
 		{
-
+			//TexCoords
 			v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_correct_bary.x
 				+ vs_out[t.GetIndex(1)].Tex.x * p_correct_bary.y
 				+ vs_out[t.GetIndex(2)].Tex.x * p_correct_bary.z;
@@ -554,9 +609,70 @@ void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
 				+ vs_out[t.GetIndex(1)].Tex.y * p_correct_bary.y
 				+ vs_out[t.GetIndex(2)].Tex.y * p_correct_bary.z;
 
+			INT TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
+			INT R = (TexColor >> 16) & 0xFF;
+			INT G = (TexColor >> 8) & 0xFF;
+			INT B = (TexColor) & 0xFF;
+
+			//Normal
+			SimpleVertex v_world;
+			v_world.Pos.x = vs_out[t.GetIndex(0)].Pos.x * p_correct_bary.x
+				+ vs_out[t.GetIndex(1)].Pos.x * p_correct_bary.y
+				+ vs_out[t.GetIndex(2)].Pos.x * p_correct_bary.z;
+
+			v_world.Pos.y = vs_out[t.GetIndex(0)].Pos.y * p_correct_bary.x
+				+ vs_out[t.GetIndex(1)].Pos.y * p_correct_bary.y
+				+ vs_out[t.GetIndex(2)].Pos.y * p_correct_bary.z;
+
+			v_world.Pos.z = vs_out[t.GetIndex(0)].Pos.z * p_correct_bary.x
+				+ vs_out[t.GetIndex(1)].Pos.z * p_correct_bary.y
+				+ vs_out[t.GetIndex(2)].Pos.z * p_correct_bary.z;
+			
+			if (p_correct_bary.x == 1.0f)
+			{
+				v_world.Normal = vs_out[t.GetIndex(0)].Normal;
+			}
+			else if (p_correct_bary.y == 1.0f)
+			{
+				v_world.Normal = vs_out[t.GetIndex(1)].Normal;
+			}
+			else if (p_correct_bary.z == 1.0f)
+			{
+				v_world.Normal = vs_out[t.GetIndex(2)].Normal;
+			}
+			else
+			{
+				v_world.Normal = t.GetNormal3f();
+			}
+
+			//Light
+			XMVECTOR lightDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos)));
+			XMVECTOR viewDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&ViewPos), XMLoadFloat3(&v_world.Pos)));
+			XMVECTOR halfwayDir = XMVector3Normalize(lightDir + viewDir);
+
+			//attenuation
+			XMFLOAT3 distance;
+			XMStoreFloat3(&distance,XMVector3Length(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos))));
+			float attenuation = 1.0f / (Light.Constant + Light.Linear * distance.x + Light.Quadratic * (distance.x * distance.x));
+
+			//ambient
+			
+			//diffuse
+			XMFLOAT3 diff_dot;
+			XMStoreFloat3(&diff_dot, XMVector3Dot(XMLoadFloat3(&v_world.Normal), lightDir));
+			float diff = max(diff_dot.x, 0.0);
+			
+			//specular
+			XMFLOAT3 spec_dot;
+			XMStoreFloat3(&spec_dot,XMVector3Dot(XMLoadFloat3(&v_world.Normal), halfwayDir));
+			float spec = pow(max(spec_dot.x, 0.0), shininess);
+			
+			R *= (Light.Ambient.x + diff*Light.Diffuse.x + spec*Light.Specular.x)*Light.Color.x*attenuation;
+			G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
+			B *= (Light.Ambient.z + diff*Light.Diffuse.z + spec*Light.Specular.z)*Light.Color.z*attenuation;
+
 			//bilinear-filter
-			BackBuffer(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y) =
-				getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
+			BackBuffer(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y) = R << 16 | G << 8 | B;
 		}
 	}
 }

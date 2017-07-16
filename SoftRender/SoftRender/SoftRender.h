@@ -37,6 +37,20 @@ struct SimpleVertex2D
 	XMFLOAT2 Tex;
 };
 
+struct LightInfo
+{
+	XMFLOAT3 Pos;
+	XMFLOAT3 Color;
+	XMMATRIX View;
+	XMMATRIX Project;
+	XMFLOAT3 Ambient;
+	XMFLOAT3 Diffuse;
+	XMFLOAT3 Specular;
+	FLOAT Constant;
+	FLOAT Linear;
+	FLOAT Quadratic;
+};
+
 class SoftRender
 {
 public:
@@ -58,6 +72,8 @@ public:
 	static Buffer<INT> Tex;
 	static SimpleVertex *vs_out;
 	static HANDLE* hThread;
+	static LightInfo Light;
+	static XMFLOAT3 ViewPos;
 private:
 	GameTimer timer;
 	bool paused;
@@ -74,9 +90,6 @@ private:
 	HDC backbuffDC;
 	HBITMAP backbuffer;
 	HBITMAP now_bitmap;
-	XMFLOAT3 LightPos;
-	XMMATRIX LightView;
-	XMMATRIX LightProject;
 
 	HRESULT InitWindow(HINSTANCE, int ,UINT, UINT);
 
