@@ -11,9 +11,11 @@ using namespace DirectX;
 class Triangle
 {
 public:
-	Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2);
-	Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2, FLOAT scale_x, FLOAT scale_y,WORD indices[3]);
+	Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
+	Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2, FLOAT scale_x, FLOAT scale_y,WORD indices[3]);
 	~Triangle();
+
+	void Initialize(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
 
 	XMVECTOR GetPoint3DPos(int index)const;
 	XMFLOAT3 GetPoint3DPos3f(int index)const;

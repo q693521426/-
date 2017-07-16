@@ -1,29 +1,25 @@
 #include "Triangle.h"
 
-Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2,FLOAT scale_x, FLOAT scale_y, WORD indices[3])
+Triangle::Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2,FLOAT scale_x, FLOAT scale_y, WORD indices[3])
 {
+	Initialize(p0, p1, p2);
+
 	this->indices = indices;
-	this->order = new INT[3]{ 0,1,2 };
-	Point3D.resize(3);
-	Point2D.resize(3);
-	Point3D[0] = p0;
-	Point3D[1] = p1;
-	Point3D[2] = p2;
 	for (int i = 0; i < 3; ++i)
 		Point2D[i] = XMFLOAT3(Point3D[i].x*scale_x, Point3D[i].y*scale_y, Point3D[i].z);
-
-	XMVECTOR v0 = GetPoint3DPos(0);
-	XMVECTOR v1 = GetPoint3DPos(1);
-	XMVECTOR v2 = GetPoint3DPos(2);
-
-	XMVECTOR e0 = XMVectorSubtract(v1, v0);
-	XMVECTOR e1 = XMVectorSubtract(v2, v0);
-
-	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
-
 }
 
-Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
+Triangle::Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
+{
+	Initialize(p0, p1, p2);
+}
+
+Triangle::~Triangle()
+{
+	delete order;
+}
+
+void Triangle::Initialize(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
 {
 	this->indices = nullptr;
 	this->order = new INT[3]{ 0,1,2 };
@@ -32,7 +28,7 @@ Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
 	Point3D[0] = p0;
 	Point3D[1] = p1;
 	Point3D[2] = p2;
-	
+
 	XMVECTOR v0 = GetPoint3DPos(0);
 	XMVECTOR v1 = GetPoint3DPos(1);
 	XMVECTOR v2 = GetPoint3DPos(2);
@@ -41,11 +37,6 @@ Triangle::Triangle(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2)
 	XMVECTOR e1 = XMVectorSubtract(v2, v0);
 
 	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
-}
-
-Triangle::~Triangle()
-{
-	delete order;
 }
 
 XMVECTOR Triangle::GetPoint3DPos(int index)const

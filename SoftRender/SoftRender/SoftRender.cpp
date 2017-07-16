@@ -77,7 +77,7 @@ Buffer<INT> SoftRender::Tex;
 SimpleVertex* SoftRender::vs_out= new SimpleVertex[vertexNum];
 HANDLE* SoftRender::hThread=new HANDLE[triangleNum];
 LightInfo SoftRender::Light;
-XMFLOAT3 SoftRender::ViewPos = XMFLOAT3(0.0f, 3.0f, -6.0f);
+XMFLOAT3 SoftRender::ViewPos = XMFLOAT3(0.0f, 3.0f, 6.0f);
 
 
 
@@ -408,7 +408,7 @@ void SoftRender::Draw(const GameTimer& gt)
 			XMVectorSet(vertices[i].Normal.x, vertices[i].Normal.y, vertices[i].Normal.z,0),
 			MathHelper::InverseTranspose(World)));
 	}
-
+	
 	for (int i = 0; i < triangleNum; ++i)
 	{
 		XMFLOAT3 p0 = transProSpace(vs_out[indices[i*3]].Pos);
@@ -416,8 +416,10 @@ void SoftRender::Draw(const GameTimer& gt)
 		XMFLOAT3 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);
 
 		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
-		if (t->IsBackCulling(mCamera.GetLook()))
+		Triangle t_world(vs_out[indices[i * 3]].Pos, vs_out[indices[i * 3+1]].Pos, vs_out[indices[i * 3+2]].Pos);
+		if (t_world.IsBackCulling(mCamera.GetLook()))
 		{
+			hThread[i] = nullptr;
 			continue;
 		}
 
@@ -487,11 +489,13 @@ void SoftRender::Draw(const GameTimer& gt)
 	}*/
 	for (int i = 0; i < triangleNum; ++i)
 	{
-		WaitForSingleObject(hThread[i], INFINITE);
+		if(hThread)
+			WaitForSingleObject(hThread[i], INFINITE);
 	}
 
 	for (int i = 0; i < triangleNum; ++i)
-		CloseHandle(hThread[i]);
+		if (hThread)
+			CloseHandle(hThread[i]);
 
 }
 
