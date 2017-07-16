@@ -526,9 +526,9 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 	float y_top = p0_3f.y;
 	float y_bottom = p0_3f.y;
 
-	for (int i = 0; i <= floorf(p1_3f.x)-left; ++i)
+	for (int i = 0; i <= ceilf(p1_3f.x)-left; ++i)
 	{
-		for (int j = ceilf(y_bottom); j <= floorf(y_top); ++j)
+		for (int j = floorf(y_bottom); j <= ceilf(y_top); ++j)
 		{
 			SimpleVertex v;
 			v.Pos = XMFLOAT3(left + i, j, 0);
@@ -549,12 +549,12 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 	y_top = p2_3f.y;
 	y_bottom = p2_3f.y;
 
-	for (int i = 0; i <= right - ceil(p1_3f.x); ++i)
+	for (int i = 0; i <= right - floorf(p1_3f.x); ++i)
 	{
 		if (y_top < y_bottom)
 			std::swap(y_top, y_bottom);
 
-		for (int j = ceilf(y_bottom); j <= floorf(y_top); ++j)
+		for (int j = floorf(y_bottom); j <= ceilf(y_top); ++j)
 		{
 			SimpleVertex v;
 			v.Pos = XMFLOAT3(right - i, j, 0);
@@ -662,14 +662,10 @@ void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
 			//ambient
 			
 			//diffuse
-			XMFLOAT3 diff_dot;
-			XMStoreFloat3(&diff_dot, XMVector3Dot(XMLoadFloat3(&v_world.Normal), lightDir));
-			float diff = max(diff_dot.x, 0.0);
+			float diff = max(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), lightDir)), 0.0);
 			
 			//specular
-			XMFLOAT3 spec_dot;
-			XMStoreFloat3(&spec_dot,XMVector3Dot(XMLoadFloat3(&v_world.Normal), halfwayDir));
-			float spec = pow(max(spec_dot.x, 0.0), shininess);
+			float spec = pow(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), halfwayDir)), shininess);
 			
 			R *= (Light.Ambient.x + diff*Light.Diffuse.x + spec*Light.Specular.x)*Light.Color.x*attenuation;
 			G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
@@ -757,27 +753,23 @@ bool SoftRender::IsInTriangle(XMFLOAT3 p_bary)
 
 XMFLOAT3 SoftRender::transProSpace(const XMFLOAT3& p)
 {
-	XMFLOAT4 v_4f;
 	XMVECTOR v;
 
 	View = mCamera.GetView();
 	Project = mCamera.GetProj();
 
 	v = XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), View*Project);
-	XMStoreFloat4(&v_4f, v);
-
-	return XMFLOAT3(v_4f.x / v_4f.w, v_4f.y / v_4f.w, v_4f.z / v_4f.w);
+	
+	return XMFLOAT3(XMVectorGetX(v) / XMVectorGetW(v), XMVectorGetY(v) / XMVectorGetW(v), XMVectorGetZ(v) / XMVectorGetW(v));
 }
 
 XMFLOAT3 SoftRender::transWorldSpace(const XMFLOAT3& p)
 {
-	XMFLOAT4 v_4f;
 	XMVECTOR v;
 
 	v = XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), World);
-	XMStoreFloat4(&v_4f, v);
 
-	return XMFLOAT3(v_4f.x/ v_4f.w, v_4f.y / v_4f.w, v_4f.z / v_4f.w);
+	return XMFLOAT3(XMVectorGetX(v) / XMVectorGetW(v), XMVectorGetY(v) / XMVectorGetW(v), XMVectorGetZ(v) / XMVectorGetW(v));
 }
 
 bool SoftRender::updateZBuffer(const XMFLOAT3& v)
