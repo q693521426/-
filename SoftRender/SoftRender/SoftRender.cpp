@@ -401,6 +401,7 @@ void SoftRender::Draw(const GameTimer& gt)
 	UpdateWorldMatrix(gt);
 	CalculateNormal();
 
+//#pragma omp parallel for
 	//for (int i = 8; i < 9; i++)
 	for (int i = 0; i < triangleNum; ++i)
 	{
@@ -409,14 +410,13 @@ void SoftRender::Draw(const GameTimer& gt)
 		XMFLOAT4 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);
 
 		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
-	//	Triangle t_world(vs_out[indices[i * 3]].Pos, vs_out[indices[i * 3+1]].Pos, vs_out[indices[i * 3+2]].Pos);
-		
+
 		if (t->IsBackCulling(XMVectorSet(p0.x, p0.y, p0.w,0.0f)))
 		{
 			hThread[i] = nullptr;
 			continue;
 		}
-
+//		DrawTriangle3D(t);
 		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
 	}
 
@@ -429,52 +429,6 @@ void SoftRender::Draw(const GameTimer& gt)
 	for (int i = 0; i < triangleNum; ++i)
 		if (hThread)
 			CloseHandle(hThread[i]);
-
-	//int tempNumThreads = triangleNum;
-	//int tempMax = 0;
-	//while (tempNumThreads >= MAXIMUM_WAIT_OBJECTS)
-	//{
-	//	tempNumThreads -= MAXIMUM_WAIT_OBJECTS;
-	//	WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &hThread[tempMax], TRUE, INFINITE);
-	//	tempMax += MAXIMUM_WAIT_OBJECTS;
-	//}
-	//DWORD dwRet = 0;
-	//int nIndex = 0;
-	//while (1)
-	//{
-	//	dwRet = WaitForMultipleObjects(triangleNum, hThread, FALSE, INFINITE);
-	//	switch (dwRet)
-	//	{
-	//	case WAIT_TIMEOUT:
-	//		break;
-	//	case WAIT_FAILED:
-	//		return ;
-	//	default:
-	//	{
-	//		nIndex = dwRet - WAIT_OBJECT_0;
-	//		nIndex++;
-	//		while (nIndex < triangleNum)
-	//		{
-	//			dwRet = WaitForMultipleObjects(triangleNum - nIndex, &hThread[nIndex], false, INFINITE);
-	//			switch (dwRet)
-	//			{
-	//			case WAIT_TIMEOUT:
-	//				nIndex = triangleNum; 
-	//				break;
-	//			case WAIT_FAILED:
-	//				return;
-	//			default:
-	//			{
-	//				nIndex = nIndex + dwRet - WAIT_OBJECT_0;
-	//				nIndex++;
-	//			}
-	//			break;
-	//			}
-	//		}
-	//	}
-	//	break;
-	//	}
-	//}
 }
 
 void SoftRender::UpdateWorldMatrix(const GameTimer& gt)
@@ -539,19 +493,19 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 	XMFLOAT4 p2 = t->GetPoint2DPos4f(2);
 
 	int i;
-	int left = floorf(p0.x);
-	int right = ceil(p2.x);
-	int top = floorf(MathHelper::Max(p0.y, p1.y, p2.y));
-	int bottom = ceilf(MathHelper::Min(p0.y, p1.y, p2.y));
+	int left = max(floorf(p0.x), -screenWidth/2);
+	int right = min(ceil(p2.x), screenWidth / 2);
+	int top = min(floorf(MathHelper::Max(p0.y, p1.y, p2.y)), screenHeight / 2.0f);
+	int bottom = max(ceilf(MathHelper::Min(p0.y, p1.y, p2.y)), screenHeight / -2.0f);
 	int scanWidth = right - left;
 	int scanHeight = top - bottom;
 
-	float k01 = slope(p0, p1);
-	float k02 = slope(p0, p2);
-	float k12 = slope(p1, p2);
+	//float k01 = slope(p0, p1);
+	//float k02 = slope(p0, p2);
+	//float k12 = slope(p1, p2);
 
-	float y_top = p0.y;
-	float y_bottom = p0.y;
+	//float y_top = p0.y;
+	//float y_bottom = p0.y;
 
 
 	XMFLOAT3 p_bary_start = transBaryCentric(XMFLOAT4( left,bottom, 0.0f,0.0f), p0, p1, p2);
@@ -566,8 +520,10 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 									p_bary_start_y1.z - p_bary_start.z);
 
 
+ //#pragma omp parallel for
 	for (int i = 0; i < scanWidth; ++i)
 	{
+ //		#pragma omp parallel for
 		for (int j = 0; j < scanHeight; ++j)
 		{
 			XMFLOAT3 p_bary;
@@ -585,7 +541,12 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 				v.Pos.y = bottom + j;
 				v.Pos.z = NormalizeProjectZ(p_correct_bary.w);
 
-				if (updateZBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, v.Pos.z))
+				int ScreenPosX = screenWidth / 2.0f + v.Pos.x;
+				int ScreenPosY = screenHeight / 2.0f + v.Pos.y;
+				ScreenPosX = MathHelper::Clamp(ScreenPosX, 0, screenWidth-1);
+				ScreenPosY = MathHelper::Clamp(ScreenPosY, 0, screenHeight-1);
+
+				if (updateZBuffer(ScreenPosX, ScreenPosY, v.Pos.z))
 				{
 					//TexCoords
 					v.Tex.x = vs_out[t->GetIndexByOrder(0)].Tex.x * p_correct_bary.x
@@ -665,7 +626,7 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 					G = min(G, 255);
 					B = min(B, 255);
 					//bilinear-filter
-					BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) = R << 16 | G << 8 | B;
+					BackBuffer(ScreenPosX, ScreenPosY) = R << 16 | G << 8 | B;
 				}
 			}
 		}

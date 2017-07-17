@@ -1,33 +1,33 @@
 ﻿  SoftRender.cpp
 c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(102): warning C4305: “=”: 从“double”到“FLOAT”截断
 c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(103): warning C4305: “=”: 从“double”到“FLOAT”截断
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(411): warning C4244: “参数”: 从“int”转换到“FLOAT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(542): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(543): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(412): warning C4244: “参数”: 从“int”转换到“FLOAT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(496): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(497): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(498): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(499): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(511): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(512): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(513): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(540): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(541): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
 c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(544): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
 c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(545): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(557): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(558): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(559): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(584): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(585): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(588): warning C4244: “参数”: 从“float”转换到“const INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(655): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(660): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(661): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(662): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(668): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(541): warning C4101: “i”: 未引用的局部变量
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(793): warning C4244: “参数”: 从“float”转换到“const INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(860): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(865): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(866): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(867): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(873): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(898): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(899): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(910): warning C4018: “>=”: 有符号/无符号不匹配
-c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(932): warning C4101: “p_bary”: 未引用的局部变量
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(616): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(621): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(622): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(623): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(495): warning C4101: “i”: 未引用的局部变量
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(754): warning C4244: “参数”: 从“float”转换到“const INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(821): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(826): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(827): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(828): warning C4244: “*=”: 从“float”转换到“INT”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(834): warning C4244: “参数”: 从“float”转换到“::size_t”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(859): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(860): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(871): warning C4018: “>=”: 有符号/无符号不匹配
+c:\users\zhengyiming\-\softrender\softrender\softrender.cpp(893): warning C4101: “p_bary”: 未引用的局部变量
 c:\users\zhengyiming\-\softrender\softrender\buffer.h(102): warning C4018: “<”: 有符号/无符号不匹配
   c:\users\zhengyiming\-\softrender\softrender\buffer.h(101): note: 编译 类 模板 成员函数 "void Buffer<FLOAT>::Clear(T)" 时
           with
