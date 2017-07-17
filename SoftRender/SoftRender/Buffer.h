@@ -116,9 +116,9 @@ const T& Buffer<T>::operator()(size_t x, size_t y)const
 template<typename T>
 T& Buffer<T>::operator()(size_t x, size_t y)
 {
-	return const_cast<T&>
-		(static_cast<const Buffer<T>&>
-		(*this)(x, y));
+	size_t index = y*width + x;
+	assert(index < height*width);
+	return buffer[index];
 }
 
 template<typename T>

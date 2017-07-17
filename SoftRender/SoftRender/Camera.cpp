@@ -4,7 +4,7 @@ using namespace DirectX;
 
 Camera::Camera()
 {
-	SetLens(MathHelper::Pi / 3, 8.0f / 6.0f, 1.0f, 1000.0f);
+	SetLens(MathHelper::Pi / 6, 8.0f / 6.0f, 1.0f, 1000.0f);
 }
 
 Camera::~Camera()
@@ -243,25 +243,27 @@ void Camera::UpdateViewMatrix()
 		XMStoreFloat3(&mUp, U);
 		XMStoreFloat3(&mLook, L);
 
-		mView(0, 0) = mRight.x;
-		mView(1, 0) = mRight.y;
-		mView(2, 0) = mRight.z;
-		mView(3, 0) = x;
+		XMMATRIX view=XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLook), XMLoadFloat3(&mUp));
+		XMStoreFloat4x4(&mView, view);
+		//mView(0, 0) = mRight.x;
+		//mView(1, 0) = mRight.y;
+		//mView(2, 0) = mRight.z;
+		//mView(3, 0) = x;
 
-		mView(0, 1) = mUp.x;
-		mView(1, 1) = mUp.y;
-		mView(2, 1) = mUp.z;
-		mView(3, 1) = y;
+		//mView(0, 1) = mUp.x;
+		//mView(1, 1) = mUp.y;
+		//mView(2, 1) = mUp.z;
+		//mView(3, 1) = y;
 
-		mView(0, 2) = mLook.x;
-		mView(1, 2) = mLook.y;
-		mView(2, 2) = mLook.z;
-		mView(3, 2) = z;
+		//mView(0, 2) = mLook.x;
+		//mView(1, 2) = mLook.y;
+		//mView(2, 2) = mLook.z;
+		//mView(3, 2) = z;
 
-		mView(0, 3) = 0.0f;
-		mView(1, 3) = 0.0f;
-		mView(2, 3) = 0.0f;
-		mView(3, 3) = 1.0f;
+		//mView(0, 3) = 0.0f;
+		//mView(1, 3) = 0.0f;
+		//mView(2, 3) = 0.0f;
+		//mView(3, 3) = 1.0f;
 
 		mViewDirty = false;
 	}

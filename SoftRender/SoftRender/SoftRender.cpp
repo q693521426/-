@@ -63,7 +63,7 @@ WORD indices[]
 
 int vertexNum = 24;
 int triangleNum = 12;
-int shininess = 60;
+int shininess = 30;
 
 INT backColor = (INT)(Colors::MidnightBlue[0] * 255) << 16
 | (INT)(Colors::MidnightBlue[1] * 255) << 8
@@ -77,14 +77,13 @@ Buffer<INT> SoftRender::Tex;
 SimpleVertex* SoftRender::vs_out= new SimpleVertex[vertexNum];
 HANDLE* SoftRender::hThread=new HANDLE[triangleNum];
 LightInfo SoftRender::Light;
-XMFLOAT3 SoftRender::ViewPos = XMFLOAT3(0.0f, 3.0f, 6.0f);
-
+XMFLOAT3 SoftRender::ViewPos = XMFLOAT3(0.0f,3.0f, -6.0f);
+Camera SoftRender::mCamera;
 
 
 SoftRender::SoftRender() :timer(), paused(false),
 fullScreen(false), hWndCaption(L"SoftRender"),
-hInst(nullptr), hWnd(nullptr),
-mCamera()
+hInst(nullptr), hWnd(nullptr),rotate_flag(false)
 {
 	XMVECTOR Eye = XMVectorSet(ViewPos.x, ViewPos.y, ViewPos.z, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
@@ -92,7 +91,7 @@ mCamera()
 	mCamera.LookAt(Eye, At, Up);
 	mCamera.UpdateViewMatrix();
 
-	Light.Pos = XMFLOAT3(0.0f, 2.0f, -2.0f);
+	Light.Pos = XMFLOAT3(0.0f, 0.0f, -2.0f);
 	Light.Color = XMFLOAT3(1.0f,1.0f,1.0f);
 	Light.View = MathHelper::LookAt(Light.Pos, XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT3(0.f, 1.0f, 0.f));
 	Light.Project = XMMatrixPerspectiveFovLH(MathHelper::Pi * 2 / 3, screenWidth / (FLOAT)screenHeight, 1.0f, 100.0f);
@@ -353,18 +352,40 @@ void SoftRender::OnKeyboardInput(const GameTimer& gt)
 	const float dt = gt.DeltaTime();
 
 	if (GetAsyncKeyState('W') & 0x8000)
+	{
 		mCamera.Walk(10.0f*dt);
+		ViewPos = mCamera.GetPosition3f();
+	}
 
 	if (GetAsyncKeyState('S') & 0x8000)
+	{
 		mCamera.Walk(-10.0f*dt);
+		ViewPos = mCamera.GetPosition3f();
+	}
 
 	if (GetAsyncKeyState('A') & 0x8000)
+	{
 		mCamera.Strafe(-10.0f*dt);
+		ViewPos = mCamera.GetPosition3f();
+	}
 
 	if (GetAsyncKeyState('D') & 0x8000)
+	{
 		mCamera.Strafe(10.0f*dt);
+		ViewPos = mCamera.GetPosition3f();
+	}
+	
+	static bool old_flag, cur_flag;
+	old_flag = cur_flag;
+	cur_flag=GetAsyncKeyState('R') & 0x8000;
+	if (!old_flag &&cur_flag)
+	{
+		rotate_flag = rotate_flag ? false : true;
+	}
 
 	mCamera.UpdateViewMatrix();
+	View = mCamera.GetView();
+	Project = mCamera.GetProj();
 }
 
 void SoftRender::Update(const GameTimer& gt)
@@ -377,13 +398,106 @@ void SoftRender::Draw(const GameTimer& gt)
 	zBuffer.Clear(1.0f);
 	BackBuffer.Clear(backColor);
 	
-	World = XMMatrixRotationY(gt.TotalTime());
-	
+	UpdateWorldMatrix(gt);
+	CalculateNormal();
+
 	//for (int i = 8; i < 9; i++)
 	for (int i = 0; i < triangleNum; ++i)
 	{
+		XMFLOAT4 p0 = transProSpace(vs_out[indices[i*3]].Pos);
+		XMFLOAT4 p1 = transProSpace(vs_out[indices[i * 3 + 1]].Pos);
+		XMFLOAT4 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);
+
+		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
+	//	Triangle t_world(vs_out[indices[i * 3]].Pos, vs_out[indices[i * 3+1]].Pos, vs_out[indices[i * 3+2]].Pos);
+		
+		if (t->IsBackCulling(XMVectorSet(p0.x, p0.y, p0.w,0.0f)))
+		{
+			hThread[i] = nullptr;
+			continue;
+		}
+
+		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
+	}
+
+	for (int i = 0; i < triangleNum; ++i)
+	{
+		if (hThread)
+			WaitForSingleObject(hThread[i], INFINITE);
+	}
+
+	for (int i = 0; i < triangleNum; ++i)
+		if (hThread)
+			CloseHandle(hThread[i]);
+
+	//int tempNumThreads = triangleNum;
+	//int tempMax = 0;
+	//while (tempNumThreads >= MAXIMUM_WAIT_OBJECTS)
+	//{
+	//	tempNumThreads -= MAXIMUM_WAIT_OBJECTS;
+	//	WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &hThread[tempMax], TRUE, INFINITE);
+	//	tempMax += MAXIMUM_WAIT_OBJECTS;
+	//}
+	//DWORD dwRet = 0;
+	//int nIndex = 0;
+	//while (1)
+	//{
+	//	dwRet = WaitForMultipleObjects(triangleNum, hThread, FALSE, INFINITE);
+	//	switch (dwRet)
+	//	{
+	//	case WAIT_TIMEOUT:
+	//		break;
+	//	case WAIT_FAILED:
+	//		return ;
+	//	default:
+	//	{
+	//		nIndex = dwRet - WAIT_OBJECT_0;
+	//		nIndex++;
+	//		while (nIndex < triangleNum)
+	//		{
+	//			dwRet = WaitForMultipleObjects(triangleNum - nIndex, &hThread[nIndex], false, INFINITE);
+	//			switch (dwRet)
+	//			{
+	//			case WAIT_TIMEOUT:
+	//				nIndex = triangleNum; 
+	//				break;
+	//			case WAIT_FAILED:
+	//				return;
+	//			default:
+	//			{
+	//				nIndex = nIndex + dwRet - WAIT_OBJECT_0;
+	//				nIndex++;
+	//			}
+	//			break;
+	//			}
+	//		}
+	//	}
+	//	break;
+	//	}
+	//}
+}
+
+void SoftRender::UpdateWorldMatrix(const GameTimer& gt)
+{
+	static float cur_rotate = 0, old_rotate = 0;
+	if (rotate_flag)
+	{
+		old_rotate = cur_rotate;
+		cur_rotate = cur_rotate + gt.DeltaTime();
+	}
+	else
+	{
+		cur_rotate = old_rotate;
+	}
+	World = XMMatrixRotationY(cur_rotate);
+}
+
+void SoftRender::CalculateNormal()
+{
+	for (int i = 0; i < triangleNum; ++i)
+	{
 		//normal
-		Triangle t_3d(vertices[indices[i*3]].Pos, vertices[indices[i * 3+1]].Pos, vertices[indices[i * 3+2]].Pos);
+		Triangle t_3d(vertices[indices[i * 3]].Pos, vertices[indices[i * 3 + 1]].Pos, vertices[indices[i * 3 + 2]].Pos);
 
 		for (int j = 0; j < 3; ++j)
 		{
@@ -397,105 +511,16 @@ void SoftRender::Draw(const GameTimer& gt)
 		vs_out[indices[i * 3 + 1]].Pos = transWorldSpace(vertices[indices[i * 3 + 1]].Pos);
 		vs_out[indices[i * 3 + 2]].Pos = transWorldSpace(vertices[indices[i * 3 + 2]].Pos);
 
-		//DrawTriangle3D(vertices, indices + i * 3, hdc);
 	}
 	for (int i = 0; i < vertexNum; ++i)
 	{
 		//frag_normal
-		XMStoreFloat3(&vertices[i].Normal, 
+		XMStoreFloat3(&vertices[i].Normal,
 			XMVector3Normalize(XMLoadFloat3(&vertices[i].Normal)));
 		XMStoreFloat3(&vs_out[i].Normal, XMVector4Transform(
-			XMVectorSet(vertices[i].Normal.x, vertices[i].Normal.y, vertices[i].Normal.z,0),
+			XMVectorSet(vertices[i].Normal.x, vertices[i].Normal.y, vertices[i].Normal.z, 0),
 			MathHelper::InverseTranspose(World)));
 	}
-	
-	for (int i = 0; i < triangleNum; ++i)
-	{
-		XMFLOAT3 p0 = transProSpace(vs_out[indices[i*3]].Pos);
-		XMFLOAT3 p1 = transProSpace(vs_out[indices[i * 3 + 1]].Pos);
-		XMFLOAT3 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);
-
-		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
-		Triangle t_world(vs_out[indices[i * 3]].Pos, vs_out[indices[i * 3+1]].Pos, vs_out[indices[i * 3+2]].Pos);
-		if (t_world.IsBackCulling(mCamera.GetLook()))
-		{
-			hThread[i] = nullptr;
-			continue;
-		}
-
-		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
-		//DrawTriangle3D(vs_out, indices + i * 3);
-	}
-	//DWORD* exitCode = new DWORD[triangleNum];
-	//while (1)
-	//{
-	//	int i;
-	//	for(i=0;i<triangleNum;++i)
-	//		GetExitCodeThread(hThread[i],exitCode+i);
-	//	for (i = 0; i < triangleNum; ++i)
-	//	{
-	//		if (exitCode[i] != STILL_ACTIVE)
-	//		{
-	//			break;
-	//		}
-	//	}
-	//	if (i == triangleNum)
-	//		break;
-	//}
-	/*int tempNumThreads = triangleNum;
-	int tempMax = 0;
-	while (tempNumThreads >= MAXIMUM_WAIT_OBJECTS)
-	{
-		tempNumThreads -= MAXIMUM_WAIT_OBJECTS;
-		WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &hThread[tempMax], TRUE, INFINITE);
-		tempMax += MAXIMUM_WAIT_OBJECTS;
-	}*/
-	/*DWORD dwRet = 0;
-	int nIndex = 0;
-	while (1)
-	{
-		dwRet = WaitForMultipleObjects(triangleNum, hThread, FALSE, INFINITE);
-		switch (dwRet)
-		{
-		case WAIT_TIMEOUT:
-			break;
-		case WAIT_FAILED:
-			return ;
-		default:
-		{
-			nIndex = dwRet - WAIT_OBJECT_0;
-			nIndex++;
-			while (nIndex < triangleNum)
-			{
-				dwRet = WaitForMultipleObjects(triangleNum - nIndex, &hThread[nIndex], false, INFINITE);
-				switch (dwRet)
-				{
-				case WAIT_TIMEOUT:
-					nIndex = triangleNum; 
-					break;
-				case WAIT_FAILED:
-					return;
-				default:
-				{
-					nIndex = nIndex + dwRet - WAIT_OBJECT_0;
-					nIndex++;
-				}
-				break;
-				}
-			}
-		}
-		break;
-		}
-	}*/
-	for (int i = 0; i < triangleNum; ++i)
-	{
-		if(hThread)
-			WaitForSingleObject(hThread[i], INFINITE);
-	}
-
-	for (int i = 0; i < triangleNum; ++i)
-		if (hThread)
-			CloseHandle(hThread[i]);
 
 }
 
@@ -503,15 +528,17 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 //void SoftRender::DrawTriangle3D(SimpleVertex* vs_out, const WORD indices[3])
 {
 	Triangle* t = (Triangle*)(lpParameter);
+	Triangle t_world(vs_out[t->GetIndex(0)].Pos, vs_out[t->GetIndex(1)].Pos, vs_out[t->GetIndex(2)].Pos);
 	//position
-	
+
 	//back-culling
 	t->sort_2D_x();
 
-	XMFLOAT3 p0_3f = t->GetPoint2DPos3f(0);
-	XMFLOAT3 p1_3f = t->GetPoint2DPos3f(1);
-	XMFLOAT3 p2_3f = t->GetPoint2DPos3f(2);
+	XMFLOAT4 p0_3f = t->GetPoint2DPos4f(0);
+	XMFLOAT4 p1_3f = t->GetPoint2DPos4f(1);
+	XMFLOAT4 p2_3f = t->GetPoint2DPos4f(2);
 
+	int i;
 	int left = floorf(p0_3f.x);
 	int right = ceil(p2_3f.x);
 	int top = floorf(MathHelper::Max(p0_3f.y, p1_3f.y, p2_3f.y));
@@ -526,39 +553,91 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 	float y_top = p0_3f.y;
 	float y_bottom = p0_3f.y;
 
-	for (int i = 0; i <= ceilf(p1_3f.x)-left; ++i)
-	{
-		for (int j = floorf(y_bottom); j <= ceilf(y_top); ++j)
+	//for (int i = 0; (i <= ceilf(p1_3f.x) - left)&& k01!= INFINITY && k02 != INFINITY; ++i)
+	//{
+	//	for (int j = floorf(y_bottom); j <= ceilf(y_top); ++j)
+	//	{
+	//		SimpleVertex v;
+	//		v.Pos = XMFLOAT3(left + i, j, 0);
+	//		DrawVextex(v, *t,t_world);
+	//	}
+	//	if (k01 > k02)
+	//	{
+	//		y_top = y_top + k01;
+	//		y_bottom = y_bottom + k02;
+	//	}
+	//	else
+	//	{
+	//		y_top = y_top + k02;
+	//		y_bottom = y_bottom + k01;
+	//	}
+	//}
+
+	//y_top = p2_3f.y;
+	//y_bottom = p2_3f.y;
+
+	//for (int i = 0; i <= (right - floor(p1_3f.x)) && k02 != INFINITY && k12 != INFINITY; ++i)
+	//{
+	//	for (int j = floor(y_bottom); j <= ceil(y_top); ++j)
+	//	{
+	//		SimpleVertex v;
+	//		v.Pos = XMFLOAT3(right - i, j, 0);
+	//		DrawVextex(v, *t,t_world);
+	//	}
+	//	if (k12 < k02)
+	//	{
+	//		y_top = y_top - k12;
+	//		y_bottom = y_bottom - k02;
+	//	}
+	//	else
+	//	{
+	//		y_top = y_top - k02;
+	//		y_bottom = y_bottom - k12;
+	//	}
+	//}
+
+	int loop = ceilf(p1_3f.x) - left;
+
+	#pragma omp parallel for 
+		for (i = 0; i <= loop; ++i)
 		{
-			SimpleVertex v;
-			v.Pos = XMFLOAT3(left + i, j, 0);
-			DrawVextex(v, *t);
+			top = ceil(y_top);
+			bottom = floor(y_bottom);
+			for (int j= bottom; j <= top; ++j)
+			{
+				SimpleVertex v;
+				v.Pos = XMFLOAT3(left + i, j, 0);
+				DrawVextex(v, *t, t_world);
+			}
+			
+			if (k01 > k02)
+			{
+				y_top = y_top + k01;
+				y_bottom = y_bottom + k02;
+			}
+			else
+			{
+				y_top = y_top + k02;
+				y_bottom = y_bottom + k01;
+			}
 		}
-		if (k01 > k02)
-		{
-			y_top = y_top + k01;
-			y_bottom = y_bottom + k02;
-		}
-		else
-		{
-			y_top = y_top + k02;
-			y_bottom = y_bottom + k01;
-		}
-	}
+	
 
 	y_top = p2_3f.y;
 	y_bottom = p2_3f.y;
 
-	for (int i = 0; i <= right - floorf(p1_3f.x); ++i)
+	loop = right - floorf(p1_3f.x);
+	
+	#pragma omp parallel for 
+	for (i = 0; i <= loop; ++i)
 	{
-		if (y_top < y_bottom)
-			std::swap(y_top, y_bottom);
-
-		for (int j = floorf(y_bottom); j <= ceilf(y_top); ++j)
+		bottom = floor(y_bottom);
+		top = ceil(y_top);
+		for (int j = bottom; j <= top; ++j)
 		{
 			SimpleVertex v;
 			v.Pos = XMFLOAT3(right - i, j, 0);
-			DrawVextex(v,*t);
+			DrawVextex(v, *t, t_world);
 		}
 		if (k12 < k02)
 		{
@@ -572,46 +651,44 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 		}
 	}
 
-	//for (int i = 0; i < scanWidth; ++i)
-	//{
-	//	for (int j = 0; j < scanHeight; ++j)
-	//	{
-	//		SimpleVertex v;
-	//		v.Pos = XMFLOAT3(left + i, bottom + j,0.0f);
-	//		
-	//		DrawVextex(v, p0_3f, p1_3f, p2_3f, indices, t.GetIndex());
-	//	}
-	//}
 	delete t;
 	return 0;
 }
 
-void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
+void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t,const Triangle& t_world)
 {
-	if (!MathHelper::IsClamp((int)(ceilf(screenWidth / 2.0f) + v.Pos.x), 0, screenWidth)
-		|| !MathHelper::IsClamp((int)(ceilf(screenHeight / 2.0f) + v.Pos.y), 0, screenHeight))
+	if (!MathHelper::IsClamp((int)(screenWidth / 2.0f + v.Pos.x), 0, screenWidth)
+		|| !MathHelper::IsClamp((int)(screenHeight / 2.0f + v.Pos.y), 0, screenHeight))
 		return;
 	//bary-centric
-	XMFLOAT3 p0 = t.GetPoint2DPos3f(0);
-	XMFLOAT3 p1 = t.GetPoint2DPos3f(1);
-	XMFLOAT3 p2 = t.GetPoint2DPos3f(2);
-
-	XMFLOAT3 p_bary = transBaryCentric(v.Pos, p0, p1, p2);
+	XMFLOAT4 p0 = t.GetPoint2DPos4f(0);
+	XMFLOAT4 p1 = t.GetPoint2DPos4f(1);
+	XMFLOAT4 p2 = t.GetPoint2DPos4f(2);
+	
+	XMFLOAT3 p_bary = transBaryCentric(XMFLOAT4(v.Pos.x, v.Pos.y,0.0f,0.0f), p0, p1, p2);
 	if (IsInTriangle(p_bary))
 	{
 		//perspective-correct
-		XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.z, p1.z, p2.z);
-		v.Pos.z = p_correct_bary.w;
-		if (updateZBuffer(XMFLOAT3(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y, v.Pos.z)))
+		XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.w, p1.w, p2.w);
+		v.Pos.z = NormalizeProjectZ(p_correct_bary.w);
+		
+		if (updateZBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, v.Pos.z))
 		{
 			//TexCoords
-			v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_correct_bary.x
-				+ vs_out[t.GetIndex(1)].Tex.x * p_correct_bary.y
-				+ vs_out[t.GetIndex(2)].Tex.x * p_correct_bary.z;
+			v.Tex.x = vs_out[t.GetIndexByOrder(0)].Tex.x * p_correct_bary.x
+				+ vs_out[t.GetIndexByOrder(1)].Tex.x * p_correct_bary.y
+				+ vs_out[t.GetIndexByOrder(2)].Tex.x * p_correct_bary.z;
 
-			v.Tex.y = vs_out[t.GetIndex(0)].Tex.y * p_correct_bary.x
-				+ vs_out[t.GetIndex(1)].Tex.y * p_correct_bary.y
-				+ vs_out[t.GetIndex(2)].Tex.y * p_correct_bary.z;
+			v.Tex.y = vs_out[t.GetIndexByOrder(0)].Tex.y * p_correct_bary.x
+				+ vs_out[t.GetIndexByOrder(1)].Tex.y * p_correct_bary.y
+				+ vs_out[t.GetIndexByOrder(2)].Tex.y * p_correct_bary.z;
+			//v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_bary.x
+			//	+ vs_out[t.GetIndex(1)].Tex.x * p_bary.y
+			//	+ vs_out[t.GetIndex(2)].Tex.x * p_bary.z;
+
+			//v.Tex.y = vs_out[t.GetIndex(0)].Tex.y * p_bary.x
+			//	+ vs_out[t.GetIndex(1)].Tex.y * p_bary.y
+			//	+ vs_out[t.GetIndex(2)].Tex.y * p_bary.z;
 
 			INT TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
 			INT R = (TexColor >> 16) & 0xFF;
@@ -620,33 +697,33 @@ void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
 
 			//Normal
 			SimpleVertex v_world;
-			v_world.Pos.x = vs_out[t.GetIndex(0)].Pos.x * p_correct_bary.x
-				+ vs_out[t.GetIndex(1)].Pos.x * p_correct_bary.y
-				+ vs_out[t.GetIndex(2)].Pos.x * p_correct_bary.z;
+			v_world.Pos.x = vs_out[t.GetIndexByOrder(0)].Pos.x * p_correct_bary.x
+				+ vs_out[t.GetIndexByOrder(1)].Pos.x * p_correct_bary.y
+				+ vs_out[t.GetIndexByOrder(2)].Pos.x * p_correct_bary.z;
 
-			v_world.Pos.y = vs_out[t.GetIndex(0)].Pos.y * p_correct_bary.x
-				+ vs_out[t.GetIndex(1)].Pos.y * p_correct_bary.y
-				+ vs_out[t.GetIndex(2)].Pos.y * p_correct_bary.z;
+			v_world.Pos.y = vs_out[t.GetIndexByOrder(0)].Pos.y * p_correct_bary.x
+				+ vs_out[t.GetIndexByOrder(1)].Pos.y * p_correct_bary.y
+				+ vs_out[t.GetIndexByOrder(2)].Pos.y * p_correct_bary.z;
 
-			v_world.Pos.z = vs_out[t.GetIndex(0)].Pos.z * p_correct_bary.x
-				+ vs_out[t.GetIndex(1)].Pos.z * p_correct_bary.y
-				+ vs_out[t.GetIndex(2)].Pos.z * p_correct_bary.z;
+			v_world.Pos.z = vs_out[t.GetIndexByOrder(0)].Pos.z * p_correct_bary.x
+				+ vs_out[t.GetIndexByOrder(1)].Pos.z * p_correct_bary.y
+				+ vs_out[t.GetIndexByOrder(2)].Pos.z * p_correct_bary.z;
 			
 			if (p_correct_bary.x == 1.0f)
 			{
-				v_world.Normal = vs_out[t.GetIndex(0)].Normal;
+				v_world.Normal = vs_out[t.GetIndexByOrder(0)].Normal;
 			}
 			else if (p_correct_bary.y == 1.0f)
 			{
-				v_world.Normal = vs_out[t.GetIndex(1)].Normal;
+				v_world.Normal = vs_out[t.GetIndexByOrder(1)].Normal;
 			}
 			else if (p_correct_bary.z == 1.0f)
 			{
-				v_world.Normal = vs_out[t.GetIndex(2)].Normal;
+				v_world.Normal = vs_out[t.GetIndexByOrder(2)].Normal;
 			}
 			else
 			{
-				v_world.Normal = t.GetNormal3f();
+				v_world.Normal = t_world.GetNormal3f();
 			}
 
 			//Light
@@ -671,17 +748,29 @@ void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t)
 			G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
 			B *= (Light.Ambient.z + diff*Light.Diffuse.z + spec*Light.Specular.z)*Light.Color.z*attenuation;
 
+			R = min(R, 255);
+			G = min(G, 255);
+			B = min(B, 255);
 			//bilinear-filter
-			BackBuffer(ceilf(screenWidth / 2.0f) + v.Pos.x, ceilf(screenHeight / 2.0f) + v.Pos.y) = R << 16 | G << 8 | B;
+			BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) = R << 16 | G << 8 | B;
 		}
 	}
 }
 
-FLOAT SoftRender::slope(const XMFLOAT3& a, const XMFLOAT3& b)
+FLOAT SoftRender::slope(const XMFLOAT4& a, const XMFLOAT4& b)
 {
 	if (a.x - b.x == 0)
 		return INFINITY;
 	return (a.y - b.y) / (a.x - b.x);
+}
+
+FLOAT SoftRender::NormalizeProjectZ(FLOAT z)
+{
+	FLOAT NearZ = mCamera.GetNearZ();
+	FLOAT FarZ = mCamera.GetFarZ();
+	FLOAT A = FarZ / (FarZ - NearZ);
+	FLOAT B = -A*NearZ;
+	return A + B / z;
 }
 
 INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v)
@@ -720,13 +809,13 @@ INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double
 	return (int)result_x<<16 | (int)result_y<<8 | (int)result_z;
 }
 
-XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT3& p, const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
+XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT4& p, const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2)
 {
 	XMFLOAT3 p_bary;
 	FLOAT det = (p1.y - p2.y)*(p0.x - p2.x) + (p2.x - p1.x)*(p0.y - p2.y);
 	FLOAT a = ((p1.y - p2.y)*(p.x - p2.x) + (p2.x - p1.x)*(p.y - p2.y)) / det;
 	FLOAT b = ((p2.y - p0.y)*(p.x - p2.x) + (p0.x - p2.x)*(p.y - p2.y)) / det;
-		
+
 	return XMFLOAT3(a, b, 1.0f - a - b);
 }
 
@@ -751,7 +840,7 @@ bool SoftRender::IsInTriangle(XMFLOAT3 p_bary)
 		MathHelper::IsClamp(p_bary.z, 0.f, 1.0f);
 }
 
-XMFLOAT3 SoftRender::transProSpace(const XMFLOAT3& p)
+XMFLOAT4 SoftRender::transProSpace(const XMFLOAT3& p)
 {
 	XMVECTOR v;
 
@@ -760,7 +849,7 @@ XMFLOAT3 SoftRender::transProSpace(const XMFLOAT3& p)
 
 	v = XMVector4Transform(XMVectorSet(p.x, p.y, p.z, 1.0f), View*Project);
 	
-	return XMFLOAT3(XMVectorGetX(v) / XMVectorGetW(v), XMVectorGetY(v) / XMVectorGetW(v), XMVectorGetZ(v) / XMVectorGetW(v));
+	return XMFLOAT4(XMVectorGetX(v) / XMVectorGetW(v), XMVectorGetY(v) / XMVectorGetW(v), XMVectorGetZ(v) / XMVectorGetW(v),XMVectorGetW(v));
 }
 
 XMFLOAT3 SoftRender::transWorldSpace(const XMFLOAT3& p)
@@ -772,11 +861,11 @@ XMFLOAT3 SoftRender::transWorldSpace(const XMFLOAT3& p)
 	return XMFLOAT3(XMVectorGetX(v) / XMVectorGetW(v), XMVectorGetY(v) / XMVectorGetW(v), XMVectorGetZ(v) / XMVectorGetW(v));
 }
 
-bool SoftRender::updateZBuffer(const XMFLOAT3& v)
+bool SoftRender::updateZBuffer(const INT x, const INT y, const FLOAT z)
 {
-	if (v.z <= zBuffer(v.x, v.y))
+	if (z <= zBuffer(x, y))
 	{
-		zBuffer(v.x, v.y) = v.z;
+		zBuffer(x, y) = z;
 		return true;
 	}
 	return false;
