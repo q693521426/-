@@ -634,6 +634,10 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 					G = min(G, 1.0f);
 					B = min(B, 1.0f);
 					//bilinear-filter
+					//float gamma_correct = 1/2.2f;
+					//R = pow(R, gamma_correct);
+					//G = pow(G, gamma_correct);
+					//B = pow(R, gamma_correct);
 					BackBuffer(ScreenPosX, ScreenPosY) = (int)(R*255) << 16 | (int)(G * 255) << 8 | (int)(B * 255);
 				}
 			}
