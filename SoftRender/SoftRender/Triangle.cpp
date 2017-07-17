@@ -128,6 +128,19 @@ bool Triangle::IsBackCulling(const XMVECTOR& LookAt)
 	return false;
 }
 
+bool Triangle::IsBackCulling(const FLOAT x, const  FLOAT y, const  FLOAT z)
+{
+	//Backface-culling
+	FLOAT dot;
+	XMFLOAT3 normal = GetNormal3f();
+	dot = x*normal.x + y*normal.y + z*normal.z;
+	if (dot > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 void Triangle::sort_2D_x()
 {
 	if (GetPoint3DPos4f(0).x > GetPoint3DPos4f(1).x)

@@ -13,7 +13,8 @@
 
 
 template class Buffer<FLOAT>;
-template class Buffer<FLOAT*>;
+template class Buffer<INT>;
+template class Buffer<XMFLOAT3>;
 
 using namespace DirectX;
 
@@ -69,7 +70,7 @@ public:
 	static int screenHeight;
 	static Buffer<INT> BackBuffer;
 	static Buffer<FLOAT> zBuffer;
-	static Buffer<INT> Tex;
+	static Buffer<XMFLOAT3> Tex;
 	static SimpleVertex *vs_out;
 	static HANDLE* hThread;
 	static LightInfo Light;
@@ -114,6 +115,7 @@ private:
 	static XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
 	static bool IsInTriangle(XMFLOAT3 p_bary);
 	static INT getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v);
+	static XMFLOAT3 getBilinearFilteredPixelColor(Buffer<XMFLOAT3>& tex, FLOAT u, FLOAT v);
 	static FLOAT NormalizeProjectZ(FLOAT z);
 };
 

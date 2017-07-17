@@ -37,6 +37,7 @@ public:
 	INT* GetOrder()const;
 
 	bool IsBackCulling(const XMVECTOR& LookAt);
+	bool IsBackCulling(const FLOAT x, const  FLOAT y, const  FLOAT z);
 	void sort_2D_x();
 
 private:

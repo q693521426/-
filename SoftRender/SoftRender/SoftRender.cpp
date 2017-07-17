@@ -73,7 +73,7 @@ int SoftRender::screenWidth=800;
 int SoftRender::screenHeight=600;
 Buffer<INT> SoftRender::BackBuffer;
 Buffer<FLOAT> SoftRender::zBuffer;
-Buffer<INT> SoftRender::Tex;
+Buffer<XMFLOAT3> SoftRender::Tex;
 SimpleVertex* SoftRender::vs_out= new SimpleVertex[vertexNum];
 HANDLE* SoftRender::hThread=new HANDLE[triangleNum];
 LightInfo SoftRender::Light;
@@ -166,7 +166,7 @@ void SoftRender::CreateTextureFromFile()
 			int R = data[(j*width + i) * 3];
 			int G = data[(j*width + i) * 3 + 1];
 			int B = data[(j*width + i) * 3 + 2];
-			Tex(i, j) = R << 16 | G << 8 | B;
+			Tex(i, j) = XMFLOAT3(R / 255.0f, G / 255.0f, B / 255.0f);
 		}
 	}
 
@@ -403,6 +403,7 @@ void SoftRender::Draw(const GameTimer& gt)
 
 //#pragma omp parallel for
 	//for (int i = 8; i < 9; i++)
+
 	for (int i = 0; i < triangleNum; ++i)
 	{
 		XMFLOAT4 p0 = transProSpace(vs_out[indices[i*3]].Pos);
@@ -411,24 +412,24 @@ void SoftRender::Draw(const GameTimer& gt)
 
 		Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);
 
-		if (t->IsBackCulling(XMVectorSet(p0.x, p0.y, p0.w,0.0f)))
+		if (t->IsBackCulling(p0.x, p0.y, p0.w))
 		{
-			hThread[i] = nullptr;
+	//		hThread[i] = nullptr;
 			continue;
 		}
-//		DrawTriangle3D(t);
-		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
+		DrawTriangle3D(t);
+//		hThread[i]=CreateThread(NULL, 0, DrawTriangle3D, (LPVOID)t, 0, NULL);
 	}
 
-	for (int i = 0; i < triangleNum; ++i)
-	{
-		if (hThread)
-			WaitForSingleObject(hThread[i], INFINITE);
-	}
+	//for (int i = 0; i < triangleNum; ++i)
+	//{
+	//	if (hThread)
+	//		WaitForSingleObject(hThread[i], INFINITE);
+	//}
 
-	for (int i = 0; i < triangleNum; ++i)
-		if (hThread)
-			CloseHandle(hThread[i]);
+	//for (int i = 0; i < triangleNum; ++i)
+	//	if (hThread)
+	//		CloseHandle(hThread[i]);
 }
 
 void SoftRender::UpdateWorldMatrix(const GameTimer& gt)
@@ -520,12 +521,27 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 									p_bary_start_y1.z - p_bary_start.z);
 
 
- //#pragma omp parallel for
+	int cpuCount = omp_get_max_threads();	
+	int chunkSize = scanWidth / cpuCount;
+	#pragma omp parallel for schedule(static,chunkSize)
+	//#pragma omp parallel 
 	for (int i = 0; i < scanWidth; ++i)
 	{
- //		#pragma omp parallel for
+		int chunkSize = scanHeight / cpuCount;
+		#pragma omp parallel for schedule(static,chunkSize)
+		//#pragma omp parallel
 		for (int j = 0; j < scanHeight; ++j)
 		{
+			SimpleVertex v;
+			v.Pos.x = left + i;
+			v.Pos.y = bottom + j;
+
+			int ScreenPosX = screenWidth / 2.0f + v.Pos.x;
+			int ScreenPosY = screenHeight / 2.0f + v.Pos.y;
+			if (!MathHelper::IsClamp(ScreenPosX, 0, screenWidth ) ||
+				!MathHelper::IsClamp(ScreenPosY, 0, screenHeight))
+				continue;
+
 			XMFLOAT3 p_bary;
 			p_bary.x = p_bary_start.x + p_bary_x.x * i + p_bary_y.x * j;
 			p_bary.y = p_bary_start.y + p_bary_x.y * i + p_bary_y.y * j;
@@ -536,15 +552,7 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 				//perspective-correct
 				XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.w, p1.w, p2.w);
 
-				SimpleVertex v;
-				v.Pos.x = left + i;
-				v.Pos.y = bottom + j;
 				v.Pos.z = NormalizeProjectZ(p_correct_bary.w);
-
-				int ScreenPosX = screenWidth / 2.0f + v.Pos.x;
-				int ScreenPosY = screenHeight / 2.0f + v.Pos.y;
-				ScreenPosX = MathHelper::Clamp(ScreenPosX, 0, screenWidth-1);
-				ScreenPosY = MathHelper::Clamp(ScreenPosY, 0, screenHeight-1);
 
 				if (updateZBuffer(ScreenPosX, ScreenPosY, v.Pos.z))
 				{
@@ -564,10 +572,10 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 					//	+ vs_out[t.GetIndex(1)].Tex.y * p_bary.y
 					//	+ vs_out[t.GetIndex(2)].Tex.y * p_bary.z;
 
-					INT TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
-					INT R = (TexColor >> 16) & 0xFF;
-					INT G = (TexColor >> 8) & 0xFF;
-					INT B = (TexColor) & 0xFF;
+					XMFLOAT3 TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
+					FLOAT R = TexColor.x;
+					FLOAT G = TexColor.y;
+					FLOAT B = TexColor.z;
 
 					//Normal
 					SimpleVertex v_world;
@@ -622,11 +630,11 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 					G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
 					B *= (Light.Ambient.z + diff*Light.Diffuse.z + spec*Light.Specular.z)*Light.Color.z*attenuation;
 
-					R = min(R, 255);
-					G = min(G, 255);
-					B = min(B, 255);
+					R = min(R, 1.0f);
+					G = min(G, 1.0f);
+					B = min(B, 1.0f);
 					//bilinear-filter
-					BackBuffer(ScreenPosX, ScreenPosY) = R << 16 | G << 8 | B;
+					BackBuffer(ScreenPosX, ScreenPosY) = (int)(R*255) << 16 | (int)(G * 255) << 8 | (int)(B * 255);
 				}
 			}
 		}
@@ -733,108 +741,108 @@ DWORD WINAPI SoftRender::DrawTriangle3D(LPVOID lpParameter)
 	delete t;
 	return 0;
 }
-
-void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t,const Triangle& t_world)
-{
-	if (!MathHelper::IsClamp((int)(screenWidth / 2.0f + v.Pos.x), 0, screenWidth)
-		|| !MathHelper::IsClamp((int)(screenHeight / 2.0f + v.Pos.y), 0, screenHeight))
-		return;
-	//bary-centric
-	XMFLOAT4 p0 = t.GetPoint2DPos4f(0);
-	XMFLOAT4 p1 = t.GetPoint2DPos4f(1);
-	XMFLOAT4 p2 = t.GetPoint2DPos4f(2);
-	
-	XMFLOAT3 p_bary = transBaryCentric(XMFLOAT4(v.Pos.x, v.Pos.y,0.0f,0.0f), p0, p1, p2);
-	if (IsInTriangle(p_bary))
-	{
-		//perspective-correct
-		XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.w, p1.w, p2.w);
-		v.Pos.z = NormalizeProjectZ(p_correct_bary.w);
-		
-		if (updateZBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, v.Pos.z))
-		{
-			//TexCoords
-			v.Tex.x = vs_out[t.GetIndexByOrder(0)].Tex.x * p_correct_bary.x
-				+ vs_out[t.GetIndexByOrder(1)].Tex.x * p_correct_bary.y
-				+ vs_out[t.GetIndexByOrder(2)].Tex.x * p_correct_bary.z;
-
-			v.Tex.y = vs_out[t.GetIndexByOrder(0)].Tex.y * p_correct_bary.x
-				+ vs_out[t.GetIndexByOrder(1)].Tex.y * p_correct_bary.y
-				+ vs_out[t.GetIndexByOrder(2)].Tex.y * p_correct_bary.z;
-			//v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_bary.x
-			//	+ vs_out[t.GetIndex(1)].Tex.x * p_bary.y
-			//	+ vs_out[t.GetIndex(2)].Tex.x * p_bary.z;
-
-			//v.Tex.y = vs_out[t.GetIndex(0)].Tex.y * p_bary.x
-			//	+ vs_out[t.GetIndex(1)].Tex.y * p_bary.y
-			//	+ vs_out[t.GetIndex(2)].Tex.y * p_bary.z;
-
-			INT TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
-			INT R = (TexColor >> 16) & 0xFF;
-			INT G = (TexColor >> 8) & 0xFF;
-			INT B = (TexColor) & 0xFF;
-
-			//Normal
-			SimpleVertex v_world;
-			v_world.Pos.x = vs_out[t.GetIndexByOrder(0)].Pos.x * p_correct_bary.x
-				+ vs_out[t.GetIndexByOrder(1)].Pos.x * p_correct_bary.y
-				+ vs_out[t.GetIndexByOrder(2)].Pos.x * p_correct_bary.z;
-
-			v_world.Pos.y = vs_out[t.GetIndexByOrder(0)].Pos.y * p_correct_bary.x
-				+ vs_out[t.GetIndexByOrder(1)].Pos.y * p_correct_bary.y
-				+ vs_out[t.GetIndexByOrder(2)].Pos.y * p_correct_bary.z;
-
-			v_world.Pos.z = vs_out[t.GetIndexByOrder(0)].Pos.z * p_correct_bary.x
-				+ vs_out[t.GetIndexByOrder(1)].Pos.z * p_correct_bary.y
-				+ vs_out[t.GetIndexByOrder(2)].Pos.z * p_correct_bary.z;
-			
-			if (p_correct_bary.x == 1.0f)
-			{
-				v_world.Normal = vs_out[t.GetIndexByOrder(0)].Normal;
-			}
-			else if (p_correct_bary.y == 1.0f)
-			{
-				v_world.Normal = vs_out[t.GetIndexByOrder(1)].Normal;
-			}
-			else if (p_correct_bary.z == 1.0f)
-			{
-				v_world.Normal = vs_out[t.GetIndexByOrder(2)].Normal;
-			}
-			else
-			{
-				v_world.Normal = t_world.GetNormal3f();
-			}
-
-			//Light
-			XMVECTOR lightDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos)));
-			XMVECTOR viewDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&ViewPos), XMLoadFloat3(&v_world.Pos)));
-			XMVECTOR halfwayDir = XMVector3Normalize(lightDir + viewDir);
-
-			//attenuation
-			XMFLOAT3 distance;
-			XMStoreFloat3(&distance,XMVector3Length(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos))));
-			float attenuation = 1.0f / (Light.Constant + Light.Linear * distance.x + Light.Quadratic * (distance.x * distance.x));
-
-			//ambient
-			
-			//diffuse
-			float diff = max(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), lightDir)), 0.0);
-			
-			//specular
-			float spec = pow(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), halfwayDir)), shininess);
-			
-			R *= (Light.Ambient.x + diff*Light.Diffuse.x + spec*Light.Specular.x)*Light.Color.x*attenuation;
-			G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
-			B *= (Light.Ambient.z + diff*Light.Diffuse.z + spec*Light.Specular.z)*Light.Color.z*attenuation;
-
-			R = min(R, 255);
-			G = min(G, 255);
-			B = min(B, 255);
-			//bilinear-filter
-			BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) = R << 16 | G << 8 | B;
-		}
-	}
-}
+//
+//void SoftRender::DrawVextex(SimpleVertex& v, const Triangle& t,const Triangle& t_world)
+//{
+//	if (!MathHelper::IsClamp((int)(screenWidth / 2.0f + v.Pos.x), 0, screenWidth)
+//		|| !MathHelper::IsClamp((int)(screenHeight / 2.0f + v.Pos.y), 0, screenHeight))
+//		return;
+//	//bary-centric
+//	XMFLOAT4 p0 = t.GetPoint2DPos4f(0);
+//	XMFLOAT4 p1 = t.GetPoint2DPos4f(1);
+//	XMFLOAT4 p2 = t.GetPoint2DPos4f(2);
+//	
+//	XMFLOAT3 p_bary = transBaryCentric(XMFLOAT4(v.Pos.x, v.Pos.y,0.0f,0.0f), p0, p1, p2);
+//	if (IsInTriangle(p_bary))
+//	{
+//		//perspective-correct
+//		XMFLOAT4 p_correct_bary = transPerspectiveCorrect(p_bary, p0.w, p1.w, p2.w);
+//		v.Pos.z = NormalizeProjectZ(p_correct_bary.w);
+//		
+//		if (updateZBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y, v.Pos.z))
+//		{
+//			//TexCoords
+//			v.Tex.x = vs_out[t.GetIndexByOrder(0)].Tex.x * p_correct_bary.x
+//				+ vs_out[t.GetIndexByOrder(1)].Tex.x * p_correct_bary.y
+//				+ vs_out[t.GetIndexByOrder(2)].Tex.x * p_correct_bary.z;
+//
+//			v.Tex.y = vs_out[t.GetIndexByOrder(0)].Tex.y * p_correct_bary.x
+//				+ vs_out[t.GetIndexByOrder(1)].Tex.y * p_correct_bary.y
+//				+ vs_out[t.GetIndexByOrder(2)].Tex.y * p_correct_bary.z;
+//			//v.Tex.x = vs_out[t.GetIndex(0)].Tex.x * p_bary.x
+//			//	+ vs_out[t.GetIndex(1)].Tex.x * p_bary.y
+//			//	+ vs_out[t.GetIndex(2)].Tex.x * p_bary.z;
+//
+//			//v.Tex.y = vs_out[t.GetIndex(0)].Tex.y * p_bary.x
+//			//	+ vs_out[t.GetIndex(1)].Tex.y * p_bary.y
+//			//	+ vs_out[t.GetIndex(2)].Tex.y * p_bary.z;
+//
+//			INT TexColor = getBilinearFilteredPixelColor(Tex, v.Tex.x, v.Tex.y);
+//			INT R = (TexColor >> 16) & 0xFF;
+//			INT G = (TexColor >> 8) & 0xFF;
+//			INT B = (TexColor) & 0xFF;
+//
+//			//Normal
+//			SimpleVertex v_world;
+//			v_world.Pos.x = vs_out[t.GetIndexByOrder(0)].Pos.x * p_correct_bary.x
+//				+ vs_out[t.GetIndexByOrder(1)].Pos.x * p_correct_bary.y
+//				+ vs_out[t.GetIndexByOrder(2)].Pos.x * p_correct_bary.z;
+//
+//			v_world.Pos.y = vs_out[t.GetIndexByOrder(0)].Pos.y * p_correct_bary.x
+//				+ vs_out[t.GetIndexByOrder(1)].Pos.y * p_correct_bary.y
+//				+ vs_out[t.GetIndexByOrder(2)].Pos.y * p_correct_bary.z;
+//
+//			v_world.Pos.z = vs_out[t.GetIndexByOrder(0)].Pos.z * p_correct_bary.x
+//				+ vs_out[t.GetIndexByOrder(1)].Pos.z * p_correct_bary.y
+//				+ vs_out[t.GetIndexByOrder(2)].Pos.z * p_correct_bary.z;
+//			
+//			if (p_correct_bary.x == 1.0f)
+//			{
+//				v_world.Normal = vs_out[t.GetIndexByOrder(0)].Normal;
+//			}
+//			else if (p_correct_bary.y == 1.0f)
+//			{
+//				v_world.Normal = vs_out[t.GetIndexByOrder(1)].Normal;
+//			}
+//			else if (p_correct_bary.z == 1.0f)
+//			{
+//				v_world.Normal = vs_out[t.GetIndexByOrder(2)].Normal;
+//			}
+//			else
+//			{
+//				v_world.Normal = t_world.GetNormal3f();
+//			}
+//
+//			//Light
+//			XMVECTOR lightDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos)));
+//			XMVECTOR viewDir = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&ViewPos), XMLoadFloat3(&v_world.Pos)));
+//			XMVECTOR halfwayDir = XMVector3Normalize(lightDir + viewDir);
+//
+//			//attenuation
+//			XMFLOAT3 distance;
+//			XMStoreFloat3(&distance,XMVector3Length(XMVectorSubtract(XMLoadFloat3(&Light.Pos), XMLoadFloat3(&v_world.Pos))));
+//			float attenuation = 1.0f / (Light.Constant + Light.Linear * distance.x + Light.Quadratic * (distance.x * distance.x));
+//
+//			//ambient
+//			
+//			//diffuse
+//			float diff = max(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), lightDir)), 0.0);
+//			
+//			//specular
+//			float spec = pow(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&v_world.Normal), halfwayDir)), shininess);
+//			
+//			R *= (Light.Ambient.x + diff*Light.Diffuse.x + spec*Light.Specular.x)*Light.Color.x*attenuation;
+//			G *= (Light.Ambient.y + diff*Light.Diffuse.y + spec*Light.Specular.y)*Light.Color.y*attenuation;
+//			B *= (Light.Ambient.z + diff*Light.Diffuse.z + spec*Light.Specular.z)*Light.Color.z*attenuation;
+//
+//			R = min(R, 255);
+//			G = min(G, 255);
+//			B = min(B, 255);
+//			//bilinear-filter
+//			BackBuffer(screenWidth / 2.0f + v.Pos.x, screenHeight / 2.0f + v.Pos.y) = R << 16 | G << 8 | B;
+//		}
+//	}
+//}
 
 FLOAT SoftRender::slope(const XMFLOAT4& a, const XMFLOAT4& b)
 {
@@ -886,6 +894,53 @@ INT SoftRender::getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double
 	}
 	
 	return (int)result_x<<16 | (int)result_y<<8 | (int)result_z;
+}
+
+XMFLOAT3 SoftRender::getBilinearFilteredPixelColor(Buffer<XMFLOAT3>& tex, FLOAT u, FLOAT v)
+{
+	u *= tex.GetWidth() - 1;
+	v *= tex.GetHeight() - 1;
+	int x = floor(u);
+	int y = floor(v);
+	FLOAT u_ratio = u - x;
+	FLOAT v_ratio = v - y;
+	FLOAT u_opposite = 1 - u_ratio;
+	FLOAT v_opposite = 1 - v_ratio;
+
+	FLOAT result_x, result_y, result_z;
+
+	x = MathHelper::Clamp(x, 0, (int)tex.GetWidth() - 1);
+	y = MathHelper::Clamp(y, 0, (int)tex.GetHeight() - 1);
+
+	if (x + 1 >= tex.GetWidth() || y + 1 >= tex.GetHeight())
+	{
+		result_x = tex(x, y).x;
+		result_y = tex(x, y).y;
+		result_z = tex(x, y).z;
+	}
+	else
+	{
+//#pragma omp parallel num_threads(3)
+//		{
+//#pragma omp sections 
+//			{
+				result_x = (tex(x, y).x * u_opposite + tex(x + 1, y).x * u_ratio) * v_opposite +
+					(tex(x, y + 1).x * u_opposite + tex(x + 1, y + 1).x * u_ratio) * v_ratio;
+//			}
+//#pragma omp sections 
+//			{
+				result_y = (tex(x, y).y * u_opposite + tex(x + 1, y).y * u_ratio) * v_opposite +
+					(tex(x, y + 1).y * u_opposite + tex(x + 1, y + 1).y * u_ratio) * v_ratio;
+//			}
+//#pragma omp sections 
+//			{
+				result_z = (tex(x, y).z * u_opposite + tex(x + 1, y).z * u_ratio) * v_opposite +
+					(tex(x, y + 1).z * u_opposite + tex(x + 1, y + 1).z * u_ratio) * v_ratio;
+//			}
+//		}
+	}
+
+	return XMFLOAT3(result_x, result_y, result_z);
 }
 
 XMFLOAT3 SoftRender::transBaryCentric(const XMFLOAT4& p, const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2)
