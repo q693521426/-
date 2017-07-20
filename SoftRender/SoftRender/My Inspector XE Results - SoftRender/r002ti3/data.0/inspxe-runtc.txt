@@ -1,0 +1,151 @@
+
+=== Start: [2017/07/19 09:58:38] === 
+Analysis started...
+Result file: C:\Users\zhengyiming\-\SoftRender\SoftRender\My Inspector XE Results - SoftRender\r002ti3\r002ti3.inspxe 
+Found target process c:\users\zhengyiming\-\softrender\x64\release\softrender.exe (PID = 4776). Analysis started... 
+Stopped at target entry - waiting for debugger to connect... 
+Loaded module: C:\Windows\system32\kernel32.dll. 
+Loaded module: C:\Windows\system32\USER32.dll. 
+Loaded module: C:\Windows\SYSTEM32\ntdll.dll. 
+Loaded module: C:\Users\zhengyiming\-\SoftRender\x64\Release\SoftRender.exe. 
+Loaded module: C:\Windows\System32\wshtcpip.dll. 
+Loaded module: C:\Program Files (x86)\Sangfor\SSL\ClientComponent\SangforTcpX64.dll. 
+Loaded module: C:\Windows\system32\VERSION.dll. 
+Loaded module: C:\Windows\system32\mswsock.dll. 
+Loaded module: C:\Windows\system32\MSASN1.dll. 
+Loaded module: C:\Windows\system32\CRYPT32.dll. 
+Loaded module: C:\Windows\system32\KERNELBASE.dll. 
+Loaded module: C:\Windows\system32\WINTRUST.dll. 
+Loaded module: C:\Windows\system32\NSI.dll. 
+Loaded module: C:\Windows\system32\ADVAPI32.dll. 
+Loaded module: C:\Windows\system32\RPCRT4.dll. 
+Loaded module: C:\Windows\system32\ole32.dll. 
+Loaded module: C:\Windows\system32\MSCTF.dll. 
+Loaded module: C:\Windows\system32\USP10.dll. 
+Loaded module: C:\Windows\system32\Ws2_32.DLL. 
+Loaded module: C:\Windows\system32\msvcrt.dll. 
+Loaded module: C:\Windows\system32\OLEAUT32.dll. 
+Loaded module: C:\Windows\SYSTEM32\sechost.dll. 
+Loaded module: C:\Windows\system32\IMM32.DLL. 
+Loaded module: C:\Windows\system32\GDI32.dll. 
+Loaded module: C:\Windows\system32\SHLWAPI.dll. 
+Loaded module: C:\Windows\system32\LPK.dll. 
+Loaded module: C:\Windows\system32\MSVCP140.dll. 
+Loaded module: C:\Windows\system32\VCRUNTIME140.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-runtime-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\ucrtbase.DLL. 
+Loaded module: C:\Windows\system32\api-ms-win-core-timezone-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-core-file-l2-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-core-localization-l1-2-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-core-synch-l1-2-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-core-processthreads-l1-1-1.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-core-file-l1-2-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-string-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-heap-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-stdio-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-convert-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-locale-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-math-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-multibyte-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-time-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-filesystem-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-environment-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\api-ms-win-crt-utility-l1-1-0.dll. 
+Loaded module: C:\Windows\system32\VCOMP140.DLL. 
+Warning: Inspector does not support the Microsoft OpenMP Runtime module and may report false positives. Refer to the product release notes. 
+Loaded module: C:\Windows\system32\uxtheme.dll. 
+Loaded module: C:\Windows\system32\apphelp.dll. 
+Loaded module: C:\Windows\system32\SOGOUPY.IME. 
+Loaded module: C:\Windows\system32\MSIMG32.dll. 
+Loaded module: C:\Windows\system32\OLEACC.dll. 
+Loaded module: C:\Windows\system32\ntmarta.dll. 
+Loaded module: C:\Windows\system32\WLDAP32.dll. 
+Loaded module: C:\Windows\system32\SHELL32.dll. 
+Loaded module: C:\Windows\system32\dwmapi.dll. 
+Loaded module: E:\搜狗\SogouInput\Components\PicFace\1.0.0.1673\PicFace64.dll. 
+Loaded module: C:\Windows\system32\profapi.dll. 
+Loaded module: C:\Windows\system32\CRYPTBASE.dll. 
+Loaded module: E:\搜狗\SogouInput\8.2.0.9419\Resource.dll. 
+Loaded module: C:\Windows\system32\PSAPI.DLL. 
+Loaded module: E:\有道词典\Dict\7.0.1.0227\WordStrokeHelper64.dll. 
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Hit debugger breakpoint (pid=4776, diag_id=14, problemType=202, rva=37783)
+Application exit code: 1 
+Result file: C:\Users\zhengyiming\-\SoftRender\SoftRender\My Inspector XE Results - SoftRender\r002ti3\r002ti3.inspxe 
+Analysis canceled by user
+=== End: [2017/07/19 10:00:07] === 

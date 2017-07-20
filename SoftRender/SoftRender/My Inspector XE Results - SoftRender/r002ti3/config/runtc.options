@@ -1,0 +1,23 @@
+-r
+C:\Users\zhengyiming\-\SoftRender\SoftRender\My Inspector XE Results - SoftRender\r002ti3
+--check-deadlock
+--check-potential-deadlock
+--save-stack-on-lock-creation
+--check-datarace
+--no-terminate-on-deadlock
+--resolution=fine
+--no-check-stack-access
+--stack-depth=16
+--sampling-budget=5
+--1cell-mode=last-write
+--tool=tclcore
+--save-stack-on-first-access
+--save-stack-on-allocation
+--check-cross-thread-stack-access
+--no-emit-ctsa-diagnostics
+--appdebug=vsdbg-on-error
+--breakpoint-file=C:\Users\ZHENGY~1\AppData\Local\Temp\inspxe-tmp-zhengyiming\vsdbg\debug-scope-1912-0.pd
+--mrte-mode=auto
+--heartbeat=1
+--
+C:\Users\zhengyiming\-\SoftRender\x64\Release\SoftRender.exe

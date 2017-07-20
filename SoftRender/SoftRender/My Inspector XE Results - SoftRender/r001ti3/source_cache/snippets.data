@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<snippets>
+  <file name="c:\users\zhengyiming\-\softrender\softrender\buffer.h" md5="b97462e111d9cd52559825a78e016e6b">
+    <snippet line="57">
+      <line line="54">void Buffer&lt;T&gt;::Initialize(size_t w, size_t h, T t)</line>
+      <line line="55">{</line>
+      <line line="56">    buffer = (T*)malloc(w*h * sizeof(T));</line>
+      <line line="57">    //buffer.resize(w*h);</line>
+      <line line="58">    width = w;</line>
+    </snippet>
+  </file>
+  <file name="c:\users\zhengyiming\-\softrender\softrender\softrender.cpp" md5="3aab78017df8287e078df34a679d4cf8">
+    <snippet line="193">
+      <line line="190">		CalculateFrameStats();</line>
+      <line line="191">		Update(timer);</line>
+      <line line="192">		Render();</line>
+      <line line="193">	}</line>
+      <line line="194"/>
+    </snippet>
+    <snippet line="402">
+      <line line="399">{</line>
+      <line line="400">//    zBuffer.Clear(1.0f);</line>
+      <line line="401">    zBuffer_fake.Clear(1);</line>
+      <line line="402">    BackBuffer.Clear(backColor);</line>
+      <line line="403">    </line>
+    </snippet>
+    <snippet line="403">
+      <line line="400">//    zBuffer.Clear(1.0f);</line>
+      <line line="401">    zBuffer_fake.Clear(1);</line>
+      <line line="402">    BackBuffer.Clear(backColor);</line>
+      <line line="403">    </line>
+      <line line="404">    UpdateWorldMatrix(gt);</line>
+    </snippet>
+    <snippet line="416">
+      <line line="413">        XMFLOAT4 p2 = transProSpace(vs_out[indices[i * 3 + 2]].Pos);</line>
+      <line line="414"/>
+      <line line="415">        Triangle* t=new Triangle(p0, p1, p2, screenWidth / 2, screenHeight / 2, indices+i*3);</line>
+      <line line="416"/>
+      <line line="417">        if (t-&gt;IsBackCulling(XMVectorSet(p0.x, p0.y, p0.w,0.0f)))</line>
+    </snippet>
+    <snippet line="592">
+      <line line="589"/>
+      <line line="590">#pragma omp parallel for schedule(dynamic)</line>
+      <line line="591">    for (int i = 0; i &lt; scanWidth; ++i)</line>
+      <line line="592">    {</line>
+      <line line="593"> //        #pragma omp parallel for</line>
+    </snippet>
+    <snippet line="628">
+      <line line="625">                //    {</line>
+      <line line="626">                //#pragma omp critical </line>
+      <line line="627">                if (zBuffer_fake(ScreenPosX, ScreenPosY))</line>
+      <line line="628">                {</line>
+      <line line="629">                    zBuffer_fake(ScreenPosX, ScreenPosY) = 0;</line>
+    </snippet>
+    <snippet line="651">
+      <line line="648">                    //Normal</line>
+      <line line="649">                    SimpleVertex v_world;</line>
+      <line line="650">                    v_world.Pos.x = vs_out[t-&gt;GetIndexByOrder(0)].Pos.x * p_correct_bary.x</line>
+      <line line="651">                        + vs_out[t-&gt;GetIndexByOrder(1)].Pos.x * p_correct_bary.y</line>
+      <line line="652">                        + vs_out[t-&gt;GetIndexByOrder(2)].Pos.x * p_correct_bary.z;</line>
+    </snippet>
+    <snippet line="710">
+      <line line="707">            //        BackBuffer(ScreenPosX, ScreenPosY) = R &lt;&lt; 16 | G &lt;&lt; 8 | B;</line>
+      <line line="708"/>
+      <line line="709">                    BackBuffer.SetBuffer(ScreenPosX, ScreenPosY, (int)R &lt;&lt; 16 | (int)G &lt;&lt; 8 | (int)B);</line>
+      <line line="710">                }</line>
+      <line line="711">            }</line>
+    </snippet>
+  </file>
+</snippets>

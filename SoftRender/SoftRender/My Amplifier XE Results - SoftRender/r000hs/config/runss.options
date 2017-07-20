@@ -1,0 +1,67 @@
+-r
+C:\Users\zhengyiming\-\SoftRender\SoftRender\My Amplifier XE Results - SoftRender\r000hs
+--stack-stitching
+--data-limit-mb=500
+--itt-config=frame
+--stackwalk=offline
+--type=cswitch
+--mrte-mode=native
+--type=cpu:counters:nostack
+--type=cpu:stack
+--interval=10
+--search-dir
+sym=C:\Users\zhengyiming\-\SoftRender\x64\Release
+--search-dir
+sym=C:\Users\zhengyiming\-\SoftRender
+--search-dir
+bin=C:\Users\zhengyiming\-\SoftRender\x64\Release
+--search-dir
+bin=C:\Users\zhengyiming\-\SoftRender
+--search-dir
+bin=C:/Users\zhengyiming\-\SoftRender\SoftRender\$(VC_ExecutablePath_x64)
+--search-dir
+bin=C:/Users\zhengyiming\-\SoftRender\SoftRender\$(WindowsSDK_ExecutablePath)
+--search-dir
+bin=C:/Users\zhengyiming\-\SoftRender\SoftRender\$(VS_ExecutablePath)
+--search-dir
+bin=C:/Users\zhengyiming\-\SoftRender\SoftRender\$(MSBuild_ExecutablePath)
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\FxCop
+--search-dir
+bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\NativeBinaries\x86
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\Trace Analyzer and Collector\9.1.2.024\bin
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2016.2.180\windows\mpi\intel64\bin
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\mpirt
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\mpirt
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler
+--search-dir
+bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler
+--search-dir
+bin=C:\Windows\system32
+--search-dir
+bin=C:\Windows
+--search-dir
+bin=C:\Windows\System32\Wbem
+--search-dir
+bin=C:\Windows\System32\WindowsPowerShell\v1.0
+--search-dir
+bin=C:\Program Files\Git\cmd
+--search-dir
+bin=C:\Program Files\Microsoft SQL Server\130\Tools\Binn
+--search-dir
+bin=C:\Windows\system32\config\systemprofile\.dnx\bin
+--search-dir
+bin=C:\Program Files\Microsoft DNX\Dnvm
+--search-dir
+bin=C:\Program Files (x86)\IntelSWTools\Trace Analyzer and Collector\9.1.2.024\dll
+--search-dir
+bin=E:\VS CODE\Microsoft VS Code\bin
+--search-dir
+bin=E:\OpenCV\opencv\build\x64\vc14\bin
+--
+C:\Users\zhengyiming\-\SoftRender\x64\Release\SoftRender.exe

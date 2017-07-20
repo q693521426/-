@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+ <rdmgr>
+  <timestamp type="u64_t">1500515174</timestamp>
+  <hostname>HIH-D-11820.hz.ntes.domain</hostname>
+  <os>windows</os>
+  <product>Intel® VTune™ Amplifier XE 2016 Update 4</product>
+  <buildNumber type="s32_t">470476</buildNumber>
+  <logicalCPUCount type="s32_t">4</logicalCPUCount>
+  <CPUFrequency type="s64_t">3200000000</CPUFrequency>
+  <isa>avx</isa>
+  <collectionTimeBegin type="u64_t">1500515174</collectionTimeBegin>
+  <collectionTimeEnd type="u64_t">1500515183</collectionTimeEnd>
+  <variables>
+   <at>hs</at>
+  </variables>
+ </rdmgr>
+</root>

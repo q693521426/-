@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<snippets>
+  <file name="c:\users\zhengyiming\-\softrender\softrender\buffer.h" md5="b97462e111d9cd52559825a78e016e6b">
+    <snippet line="57">
+      <line line="54">void Buffer&lt;T&gt;::Initialize(size_t w, size_t h, T t)</line>
+      <line line="55">{</line>
+      <line line="56">    buffer = (T*)malloc(w*h * sizeof(T));</line>
+      <line line="57">    //buffer.resize(w*h);</line>
+      <line line="58">    width = w;</line>
+    </snippet>
+  </file>
+  <file name="c:\users\zhengyiming\-\softrender\softrender\softrender.cpp" md5="3aab78017df8287e078df34a679d4cf8">
+    <snippet line="402">
+      <line line="399">{</line>
+      <line line="400">//    zBuffer.Clear(1.0f);</line>
+      <line line="401">    zBuffer_fake.Clear(1);</line>
+      <line line="402">    BackBuffer.Clear(backColor);</line>
+      <line line="403">    </line>
+    </snippet>
+    <snippet line="630">
+      <line line="627">                if (zBuffer_fake(ScreenPosX, ScreenPosY))</line>
+      <line line="628">                {</line>
+      <line line="629">                    zBuffer_fake(ScreenPosX, ScreenPosY) = 0;</line>
+      <line line="630"/>
+      <line line="631">                    //TexCoords</line>
+    </snippet>
+  </file>
+</snippets>
