@@ -1,5 +1,9 @@
 #include "Triangle.h"
 
+Triangle::Triangle()
+{
+}
+
 Triangle::Triangle(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2,FLOAT scale_x, FLOAT scale_y, WORD indices[3])
 {
 	Initialize(p0, p1, p2);
@@ -31,9 +35,11 @@ Triangle::Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
 Triangle::~Triangle()
 {
 	delete order;
+	indices = nullptr;
+	
 }
 
-void Triangle::Initialize(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2)
+inline void Triangle::Initialize(const XMFLOAT4 p0, const XMFLOAT4 p1, const XMFLOAT4 p2)
 {
 	this->indices = nullptr;
 	this->order = new INT[3]{ 0,1,2 };
@@ -53,7 +59,7 @@ void Triangle::Initialize(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4
 	XMStoreFloat3(&normal, XMVector3Normalize(XMVector3Cross(e0, e1)));
 }
 
-void Triangle::Initialize(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2)
+inline void Triangle::Initialize(const XMFLOAT3 p0, const XMFLOAT3 p1, const XMFLOAT3 p2)
 {
 	this->indices = nullptr;
 	this->order = new INT[3]{ 0,1,2 };

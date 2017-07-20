@@ -75,6 +75,15 @@ public:
 		else
 			return false;
 	}
+
+	template<typename T>
+	static bool IsClampClosed(const T& x, const T& low, const T& high)
+	{
+		if (x >= low && x <= high)
+			return true;
+		else
+			return false;
+	}
 	// Returns the polar angle of the point (x,y) in [0, 2*PI).
 	static float AngleFromXY(float x, float y);
 

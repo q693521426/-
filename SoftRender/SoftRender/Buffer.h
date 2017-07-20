@@ -23,6 +23,7 @@ public:
 	void Release();
 	const T& operator()(size_t x,size_t y)const;
 	T& operator()(size_t x, size_t y);
+	void SetBuffer(size_t x, size_t y, const T& t);
 private:
 	T* buffer;
 	size_t width;
@@ -125,6 +126,15 @@ template<typename T>
 T** Buffer<T>::GetppBuffer()
 {
 	return &buffer;
+}
+
+template<typename T>
+void Buffer<T>::SetBuffer(size_t x, size_t y,const T& t)
+{
+	size_t index = y*width + x;
+	assert(index < height*width);
+	buffer[index] = t;
+	return;
 }
 
 #endif

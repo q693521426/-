@@ -19,7 +19,7 @@ using namespace DirectX;
 
 struct SimpleVertex
 {
-	XMFLOAT3 Pos;
+	XMFLOAT4 Pos;
 	XMFLOAT2 Tex;
 	XMFLOAT3 Normal;
 };
@@ -27,6 +27,7 @@ struct SimpleVertex
 struct VS_OUT
 {
 	SimpleVertex* vs_out;
+	FLOAT w;
 	WORD* indices;
 	VS_OUT(SimpleVertex* vs_out,WORD* indices):vs_out(vs_out),indices(indices){}
 };
@@ -59,22 +60,24 @@ public:
 	~SoftRender();
 
 	bool Initialize(HINSTANCE, int ,UINT ,UINT);
-	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+	inline LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 	int Run();
 	void Shutdown();
 
 public:
-	static int screenWidth;
-	static int screenHeight;
-	static Buffer<INT> BackBuffer;
-	static Buffer<FLOAT> zBuffer;
-	static Buffer<INT> Tex;
-	static SimpleVertex *vs_out;
-	static HANDLE* hThread;
-	static LightInfo Light;
-	static XMFLOAT3 ViewPos;
-	static Camera mCamera;
+	 int screenWidth;
+	 int screenHeight;
+	 Buffer<INT> BackBuffer;
+	 Buffer<FLOAT> zBuffer;
+	 Buffer<INT> zBuffer_fake;
+	 Buffer<XMFLOAT3> Tex;
+	 SimpleVertex *vs_out;
+	 HANDLE* hThread;
+	 LightInfo Light;
+	 XMFLOAT3 ViewPos;
+	 Camera mCamera;
+	 Triangle* t_world;
 private:
 	GameTimer timer;
 	bool paused;
@@ -90,31 +93,35 @@ private:
 	HDC backbuffDC;
 	HBITMAP backbuffer;
 	HBITMAP now_bitmap;
-	bool rotate_flag;
+	bool rotate_flag_x;
+	bool rotate_flag_y;
 
 	HRESULT InitWindow(HINSTANCE, int ,UINT, UINT);
 
-	void CalculateFrameStats();
-	void CalculateNormal();
-	void UpdateWorldMatrix(const GameTimer& gt);
-	void OnKeyboardInput(const GameTimer& gt);
-	void Update(const GameTimer& gt);
+	inline void CalculateFrameStats();
+	inline void CalculateNormal();
+	inline void UpdateWorldMatrix(const GameTimer& gt);
+	inline void OnKeyboardInput(const GameTimer& gt);
+	inline void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
 	void Render();
 	//void ClearRenderTargetView(INT ColorRBGA);
-	XMFLOAT4 transProSpace(const XMFLOAT3& p);
-	XMFLOAT3 transWorldSpace(const XMFLOAT3& p);
-	static DWORD WINAPI DrawTriangle3D(LPVOID lpParameter);
-	static void DrawVextex(SimpleVertex& v, const Triangle& t, const Triangle& t_world);
-	//void sort_x(XMFLOAT3& a, XMFLOAT3& b, XMFLOAT3& c);
-	static FLOAT slope(const XMFLOAT4& a, const XMFLOAT4& b);
-	static bool updateZBuffer(const INT x, const INT y, const FLOAT z);
-	static void CreateTextureFromFile();
-	static XMFLOAT3 transBaryCentric(const XMFLOAT4& p, const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2);
-	static XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
-	static bool IsInTriangle(XMFLOAT3 p_bary);
-	static INT getBilinearFilteredPixelColor(Buffer<INT>& tex, double u, double v);
-	static FLOAT NormalizeProjectZ(FLOAT z);
+	inline XMFLOAT4 transProSpace(const XMFLOAT4& p);
+	inline XMFLOAT4 transViewSpace(const XMFLOAT4& p);
+	inline XMFLOAT4 transWorldSpace(const XMFLOAT4& p);
+	inline  DWORD WINAPI DrawTriangle3D(LPVOID lpParameter);
+	//void (XMFLOAT3& a, XMFLOAT3& b, XMFLOAT3& c);
+	inline  FLOAT slope(const XMFLOAT4& a, const XMFLOAT4& b);
+	inline  bool updateZBuffer(const INT x, const INT y, const INT z);
+	inline  void CreateTextureFromFile();
+	inline  XMFLOAT3 transBaryCentric(const XMFLOAT4& p, const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2);
+	inline  XMFLOAT4 transPerspectiveCorrect(const XMFLOAT3& p_bary, const FLOAT z0, const FLOAT z1, const FLOAT z2);
+	inline  bool IsInTriangle(XMFLOAT3 p_bary);
+	inline  bool IsInTriangle(XMFLOAT4 p_bary);
+	inline  bool IsInView(const XMFLOAT4& p);
+	inline  XMFLOAT3 getBilinearFilteredPixelColor(Buffer<XMFLOAT3>& tex, double u, double v);
+	inline  FLOAT NormalizeProjectZ(FLOAT z);
+	inline FLOAT pow(const FLOAT a, const INT b);
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

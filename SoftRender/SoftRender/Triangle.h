@@ -11,6 +11,7 @@ using namespace DirectX;
 class Triangle
 {
 public:
+	Triangle();
 	Triangle(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2);
 	Triangle(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2, FLOAT scale_x, FLOAT scale_y,WORD indices[3]);
 	Triangle(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
@@ -18,8 +19,8 @@ public:
 
 	~Triangle();
 
-	void Initialize(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2);
-	void Initialize(const XMFLOAT4& p0, const XMFLOAT4& p1, const XMFLOAT4& p2);
+	inline void Initialize(const XMFLOAT3 p0, const XMFLOAT3 p1, const XMFLOAT3 p2);
+	inline void Initialize(const XMFLOAT4 p0, const XMFLOAT4 p1, const XMFLOAT4 p2);
 
 	XMVECTOR GetPoint3DPos(int index)const;
 	XMFLOAT4 GetPoint3DPos4f(int index)const;
